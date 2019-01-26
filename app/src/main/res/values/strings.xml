@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name" translatable="false">Chroma</string>
+
+    <string name="adriel_cafe" translatable="false">Adriel Café</string>
+    <string name="android_developer" translatable="false">Android Developer</string>
+    <string name="adrielcafe_chromaandroidapp" translatable="false">adrielcafe/ChromaAndroidApp</string>
+
+    <string name="sharp_symbol" translatable="false">♯</string>
+    <string name="flat_symbol" translatable="false">♭</string>
+    <string name="hertz_unit" translatable="false">Hz</string>
+    <string name="deviation_unit" translatable="false">ct</string>
+
+    <string name="tuner">Tuner</string>
+    <string name="settings">Settings</string>
+    <string name="hi_there_are_you_enjoying_the_app">Hi there! Are you enjoying the app? I hope so 😊\n\nIf you have any question, suggestion or want to contribute (new content, found a bug, translation…) please contact me using the links below.</string>
+    <string name="this_app_is_open_source">This app is open source, contributions are very welcome!</string>
+    <string name="open_menu">Open menu</string>
+    <string name="close_menu">Close menu</string>
+    <string name="about">About</string>
+    <string name="buy_me_coffee">Buy Me A Coffee</string>
+    <string name="share">Share</string>
+    <string name="rate_review">Rate &amp; Review</string>
+    <string name="you_should_try">You should try Chroma!</string>
+    <string name="thanks_for_support">Thank you for your support! ☕ 😋</string>
+    <string name="later">Later</string>
+    <string name="donate">Donate</string>
+    <string name="app_content_free">This app and all its content are free.\nIf you\'re enjoying and want to support the development, feel free to buy me a ☕.</string>
+    <string name="something_went_wrong">Oops! Something went wrong</string>
+    <string name="notation">Notation</string>
+    <string name="a_b_c">A B C</string>
+    <string name="do_re_mi">Do Re Mi</string>
+    <string name="precision">Precision</string>
+    <string name="basic_mode">Basic Mode</string>
+    <string name="hide_secondary_data">Hide secondary data such as octave and frequency.</string>
+    <string name="sharp_flat">Sharp/Flat</string>
+    <string name="pitch_algorithm">Pitch Algorithm</string>
+    <string name="sharp">Sharp (♯)</string>
+    <string name="flat">Flat (♭)</string>
+    <string name="make_noise">Make\nSome\n<font fgcolor='#1abc9c'>Noise!</font></string>
+    <string name="give_permission">Give permission</string>
+    <string name="request_again">Request again</string>
+    <string name="permission_needed">Permission needed to continue</string>
+
+    <string-array name="preference_tuner_pitch_algorithm_entries">
+        <item>YIN</item>
+        <item>FFT YIN</item>
+        <item>MPM</item>
+        <item>AMDF</item>
+        <item>Dynamic Wavelet</item>
+    </string-array>
+    <string-array name="preference_tuner_pitch_algorithm_values">
+        <item>0</item> <!-- Default -->
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="preference_tuner_notation_entries">
+        <item>@string/a_b_c</item>
+        <item>@string/do_re_mi</item>
+    </string-array>
+    <string-array name="preference_tuner_notation_values">
+        <item>0</item> <!-- Default -->
+        <item>1</item>
+    </string-array>
+
+    <string-array name="preference_tuner_sharp_flat_entries">
+        <item>@string/sharp</item>
+        <item>@string/flat</item>
+    </string-array>
+    <string-array name="preference_tuner_sharp_flat_values">
+        <item>0</item> <!-- Default -->
+        <item>1</item>
+    </string-array>
+
+    <string-array name="preference_tuner_precision_entries">
+        <item>0 ct</item>
+        <item>-1/1 ct</item>
+        <item>-2/2 ct</item>
+        <item>-5/5 ct</item>
+    </string-array>
+    <string-array name="preference_tuner_precision_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item> <!-- Default -->
+        <item>5</item>
+    </string-array>
+</resources>

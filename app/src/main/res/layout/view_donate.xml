@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="20dp"
+        android:text="@string/app_content_free"
+        android:textSize="14sp"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/v1Coffee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/vDescription"
+        android:layout_marginStart="22dp"
+        android:text="x1"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/grey_400"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/v3Coffee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/vDescription"
+        android:text="x3"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/grey_400"
+        tools:textColor="@color/colorAccent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/v5Coffee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/vDescription"
+        android:layout_marginEnd="22dp"
+        android:text="x5"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/grey_400"/>
+
+    <com.etiennelawlor.discreteslider.library.ui.DiscreteSlider
+        android:id="@+id/vSlider"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_below="@id/v1Coffee"
+        app:tickMarkCount="3"
+        app:tickMarkRadius="10dp"
+        app:horizontalBarThickness="5dp"
+        app:backdropFillColor="@color/grey_400"
+        app:backdropStrokeColor="@android:color/transparent"
+        app:progressDrawable="@drawable/slider_progress"
+        tools:position="1"/>
+
+</RelativeLayout>

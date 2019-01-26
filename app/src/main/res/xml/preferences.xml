@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/tuner">
+
+        <SwitchPreferenceCompat
+            app:key="tuner_basic_mode"
+            app:title="@string/basic_mode"
+            app:summary="@string/hide_secondary_data"
+            app:defaultValue="false"/>
+
+        <DropDownPreference
+            app:key="tuner_pitch_algorithm"
+            app:title="@string/pitch_algorithm"
+            app:useSimpleSummaryProvider="true"
+            app:entries="@array/preference_tuner_pitch_algorithm_entries"
+            app:entryValues="@array/preference_tuner_pitch_algorithm_values"
+            app:defaultValue="0"/>
+
+        <DropDownPreference
+            app:key="tuner_notation"
+            app:title="@string/notation"
+            app:useSimpleSummaryProvider="true"
+            app:entries="@array/preference_tuner_notation_entries"
+            app:entryValues="@array/preference_tuner_notation_values"
+            app:defaultValue="0"/>
+
+        <DropDownPreference
+            app:key="tuner_sharp_flat"
+            app:title="@string/sharp_flat"
+            app:useSimpleSummaryProvider="true"
+            app:entries="@array/preference_tuner_sharp_flat_entries"
+            app:entryValues="@array/preference_tuner_sharp_flat_values"
+            app:defaultValue="0"/>
+
+        <DropDownPreference
+            app:key="tuner_precision"
+            app:title="@string/precision"
+            app:useSimpleSummaryProvider="true"
+            app:entries="@array/preference_tuner_precision_entries"
+            app:entryValues="@array/preference_tuner_precision_values"
+            app:defaultValue="2"/>
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

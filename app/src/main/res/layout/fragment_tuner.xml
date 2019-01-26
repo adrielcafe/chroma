@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/colorPrimary"
+    tools:context=".view.main.tuner.TunerFragment">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vMakeNoise"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:text="@string/make_noise"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline2"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/pacifico"
+        app:layout_constraintBottom_toTopOf="@+id/vDeviationBars"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lineHeight="70dp"
+        tools:visibility="gone"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vTone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:includeFontPadding="false"
+        android:minWidth="100dp"
+        android:textColor="@android:color/white"
+        android:textSize="150sp"
+        android:textStyle="bold"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toTopOf="@+id/lineH45"
+        app:layout_constraintEnd_toStartOf="@+id/lineV60"
+        tools:text="C" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vSemitone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/vTone"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="80sp"
+        android:textStyle="bold"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintStart_toStartOf="@+id/lineV60"
+        app:layout_constraintTop_toTopOf="@+id/vTone"
+        tools:text="@string/sharp_symbol" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vOctave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/vTone"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="15dp"
+        android:layout_toEndOf="@id/vTone"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toBottomOf="@+id/vTone"
+        app:layout_constraintStart_toStartOf="@+id/lineV60"
+        tools:text="4" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vStandardFrequency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vTone"
+        android:layout_marginBottom="20dp"
+        android:alpha=".5"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toTopOf="@+id/lineH45"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/vStandardFrequencyUnit"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@+id/vTone"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="277.18" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vStandardFrequencyUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/vStandardFrequency"
+        android:layout_marginStart="3dp"
+        android:layout_marginBottom="1dp"
+        android:layout_toEndOf="@id/vStandardFrequency"
+        android:alpha=".5"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toBottomOf="@+id/vStandardFrequency"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/vStandardFrequency"
+        tools:text="@string/hertz_unit" />
+
+    <cafe.adriel.chroma.view.custom.DeviationView
+        android:id="@+id/vDeviationBars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vStandardFrequency"
+        app:layout_constraintTop_toBottomOf="@+id/lineH45" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vDeviation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vDeviationBars"
+        android:layout_marginTop="20dp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline3"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/vDeviationUnit"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vDeviationBars"
+        tools:text="-20" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vDeviationUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/vDeviation"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="5dp"
+        android:layout_toEndOf="@id/vDeviation"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toBottomOf="@+id/vDeviation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/vDeviation"
+        tools:text="@string/deviation_unit" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vFrequency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vDeviation"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/vFrequencyUnit"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vDeviation"
+        tools:text="277.18" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/vFrequencyUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/vFrequency"
+        android:layout_marginStart="3dp"
+        android:layout_marginBottom="1dp"
+        android:layout_toEndOf="@id/vFrequency"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textColor="@android:color/white"
+        app:fontFamily="@font/noto_sans"
+        app:layout_constraintBottom_toBottomOf="@+id/vFrequency"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/vFrequency"
+        tools:text="@string/hertz_unit" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/vGivePermission"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="@string/give_permission"
+        android:background="@drawable/bg_outline_white_ripple"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vDeviationBars"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/lineV60"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.60" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/lineH45"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
