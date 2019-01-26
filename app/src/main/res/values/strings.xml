@@ -49,8 +49,8 @@
         <item>Dynamic Wavelet</item>
     </string-array>
     <string-array name="preference_tuner_pitch_algorithm_values">
-        <item>0</item> <!-- Default -->
-        <item>1</item>
+        <item>0</item>
+        <item>1</item> <!-- Default -->
         <item>2</item>
         <item>3</item>
         <item>4</item>
@@ -76,9 +76,9 @@
 
     <string-array name="preference_tuner_precision_entries">
         <item>0 ct</item>
-        <item>-1/1 ct</item>
-        <item>-2/2 ct</item>
-        <item>-5/5 ct</item>
+        <item>-1/+1 ct</item>
+        <item>-2/+2 ct</item>
+        <item>-5/+5 ct</item>
     </string-array>
     <string-array name="preference_tuner_precision_values">
         <item>0</item>

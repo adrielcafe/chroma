@@ -16,7 +16,7 @@
             app:useSimpleSummaryProvider="true"
             app:entries="@array/preference_tuner_pitch_algorithm_entries"
             app:entryValues="@array/preference_tuner_pitch_algorithm_values"
-            app:defaultValue="0"/>
+            app:defaultValue="1"/>
 
         <DropDownPreference
             app:key="tuner_notation"
