@@ -46,6 +46,7 @@ class TunerViewModel(app: Application) : CoroutineScopedStateViewModel<TunerView
     override fun onCleared() {
         super.onCleared()
         PreferenceManager.getDefaultSharedPreferences(app).unregisterOnSharedPreferenceChangeListener(this)
+        stopListening()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -68,7 +69,14 @@ class TunerViewModel(app: Application) : CoroutineScopedStateViewModel<TunerView
     }
 
     fun stopListening(){
-        if(::audioDispatcher.isInitialized) audioDispatcher.stop()
+        if(::audioDispatcher.isInitialized) {
+            try {
+                audioDispatcher.stop()
+            } catch (e: Exception){
+                Crashlytics.logException(e)
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun getTuning(frequency: Float): Tuning {
