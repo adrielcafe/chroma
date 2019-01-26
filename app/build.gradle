@@ -21,7 +21,8 @@ android {
             buildConfigField 'Boolean', 'RELEASE', 'false'
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField 'Boolean', 'RELEASE', 'true'
         }
@@ -40,12 +41,12 @@ android {
 }
 
 kapt {
-    useBuildCache = true
+    useBuildCache true
 }
 
 androidExtensions {
-    experimental = true
-    defaultCacheImplementation = "SPARSE_ARRAY"
+    experimental true
+    defaultCacheImplementation "SPARSE_ARRAY"
 }
 
 dependencies {
