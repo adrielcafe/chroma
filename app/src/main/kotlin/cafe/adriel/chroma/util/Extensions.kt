@@ -23,22 +23,25 @@ fun Context.color(@ColorRes resId: Int) = ResourcesCompat.getColor(resources, re
 fun View.color(@ColorRes resId: Int) = context.color(resId)
 fun Fragment.color(@ColorRes resId: Int) = context?.color(resId) ?: Color.TRANSPARENT
 
+fun Context.showToast(message: String, length: Int = Toast.LENGTH_SHORT) = Toast.makeText(this, message, length).show()
+fun Fragment.showToast(message: String, length: Int = Toast.LENGTH_SHORT) = context?.showToast(message, length)
+
+fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
+    context.startActivity(Intent(Intent.ACTION_VIEW, this))
+} catch (e: Exception) {
+    if(showErrorMessage) {
+        context.showToast(context.getString(R.string.something_went_wrong))
+    }
+    Crashlytics.logException(e)
+    e.printStackTrace()
+}
+
 fun String.share(activity: Activity) =
     ShareCompat.IntentBuilder
         .from(activity)
         .setText(this)
         .setType(ClipDescription.MIMETYPE_TEXT_PLAIN)
         .startChooser()
-
-fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
-    context.startActivity(Intent(Intent.ACTION_VIEW, this))
-} catch (e: Exception) {
-    if(showErrorMessage) {
-        Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
-    }
-    Crashlytics.logException(e)
-    e.printStackTrace()
-}
 
 fun getDeviationColorRes(deviation: Int, precision: Int) =
     if(deviation in -precision..precision) R.color.green

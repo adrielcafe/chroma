@@ -5,4 +5,5 @@ import cafe.adriel.chroma.model.Tuning
 import com.etiennelenhart.eiffel.state.ViewState
 
 data class TunerViewState(val tuning: Tuning,
-                          val settings: Settings) : ViewState
+                          val settings: Settings,
+                          val exception: Exception? = null) : ViewState

@@ -1,7 +1,6 @@
 package cafe.adriel.chroma.view.main.tuner
 
 import android.Manifest
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -11,9 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.util.CoroutineScopedStateViewModelFactory
 import cafe.adriel.chroma.util.color
 import cafe.adriel.chroma.util.getDeviationColorRes
+import cafe.adriel.chroma.util.getViewModel
+import cafe.adriel.chroma.util.showToast
 import cafe.adriel.chroma.view.BaseFragment
 import com.google.android.material.snackbar.Snackbar
 import com.markodevcic.peko.Peko
@@ -24,12 +24,10 @@ import kotlinx.coroutines.launch
 class TunerFragment: BaseFragment<TunerViewState>() {
 
     companion object {
-        private const val REQUEST_PERMISSION_SETTING = 0
+        private const val REQUEST_SHOW_APP_SETTINGS = 0
     }
 
-    private val viewModel by lazy {
-        CoroutineScopedStateViewModelFactory.getInstance(context?.applicationContext as Application).create(TunerViewModel::class.java)
-    }
+    override val viewModel by lazy { getViewModel<TunerViewModel>(requireActivity().application) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(cafe.adriel.chroma.R.layout.fragment_tuner, container, false)
@@ -37,25 +35,26 @@ class TunerFragment: BaseFragment<TunerViewState>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.observeState(this, ::onStateUpdated)
         startListening()
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.stopListening()
+        launch {
+            viewModel.stopListening()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode){
-            REQUEST_PERMISSION_SETTING -> startListening()
+            REQUEST_SHOW_APP_SETTINGS -> startListening()
         }
     }
 
     override fun onStateUpdated(state: TunerViewState) {
         state.apply {
-            if(tuning.note != null) {
+            tuning.note?.let {
                 val visibility = if(settings.basicMode) View.GONE else View.VISIBLE
                 val tone = if(settings.flatSymbol && settings.solfegeNotation && tuning.note.semitone){
                     ChromaticScale.getSolfegeTone(ChromaticScale.getFlatTone(tuning.note.tone))
@@ -98,6 +97,9 @@ class TunerFragment: BaseFragment<TunerViewState>() {
                 vDeviation.setTextColor(color(getDeviationColorRes(tuning.deviation, settings.precision)))
                 vDeviationUnit.setTextColor(color(getDeviationColorRes(tuning.deviation, settings.precision)))
             }
+            exception?.let {
+                showToast("ERROR: ${it.message}")
+            }
         }
     }
 
@@ -123,7 +125,7 @@ class TunerFragment: BaseFragment<TunerViewState>() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", requireActivity().packageName, null)
         }
-        startActivityForResult(intent, REQUEST_PERMISSION_SETTING)
+        startActivityForResult(intent, REQUEST_SHOW_APP_SETTINGS)
     }
 
 }

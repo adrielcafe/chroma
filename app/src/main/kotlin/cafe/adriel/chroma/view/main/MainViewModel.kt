@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import cafe.adriel.chroma.BuildConfig
-import cafe.adriel.chroma.util.CoroutineScopedStateViewModel
+import cafe.adriel.chroma.util.StateAndroidViewModel
 import com.crashlytics.android.Crashlytics
 import com.github.stephenvinouze.core.managers.KinAppManager
 import com.github.stephenvinouze.core.models.KinAppProductType
@@ -12,7 +12,7 @@ import com.github.stephenvinouze.core.models.KinAppPurchase
 import com.github.stephenvinouze.core.models.KinAppPurchaseResult
 import kotlinx.coroutines.launch
 
-class MainViewModel(app: Application) : CoroutineScopedStateViewModel<MainViewState>(app), KinAppManager.KinAppListener {
+class MainViewModel(app: Application) : StateAndroidViewModel<MainViewState>(app), KinAppManager.KinAppListener {
 
     private val billingManager by lazy {
         KinAppManager(app, "")

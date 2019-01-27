@@ -43,10 +43,10 @@
 
     <string-array name="preference_tuner_pitch_algorithm_entries">
         <item>YIN</item>
-        <item>FFT YIN</item>
-        <item>MPM</item>
-        <item>AMDF</item>
-        <item>Dynamic Wavelet</item>
+        <item>FFT YIN (Fast Fourier Transform)</item>
+        <item>MPM (McLeod Pitch Method)</item>
+        <item>AMDF (Average Magnitude Difference Function)</item>
+        <item>DYWA (Dynamic Wavelet)</item>
     </string-array>
     <string-array name="preference_tuner_pitch_algorithm_values">
         <item>0</item>

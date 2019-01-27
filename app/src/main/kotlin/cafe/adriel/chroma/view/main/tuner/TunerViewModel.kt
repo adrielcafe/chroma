@@ -10,7 +10,7 @@ import be.tarsos.dsp.pitch.PitchProcessor
 import cafe.adriel.chroma.model.ChromaticScale
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
-import cafe.adriel.chroma.util.CoroutineScopedStateViewModel
+import cafe.adriel.chroma.util.StateAndroidViewModel
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,20 +19,27 @@ import kotlin.math.abs
 import kotlin.math.log2
 import kotlin.math.roundToInt
 
-class TunerViewModel(app: Application) : CoroutineScopedStateViewModel<TunerViewState>(app), SharedPreferences.OnSharedPreferenceChangeListener {
+class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(app), SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private lateinit var audioDispatcher: AudioDispatcher
+    companion object {
+        private const val AUDIO_SAMPLE_RATE = 22050
+        private const val AUDIO_BUFFER_SIZE = 2048
+        private const val AUDIO_BUFFER_OVERLAP = 0
+    }
+
+    private var audioDispatcher: AudioDispatcher? = null
     private val pitchHandler by lazy {
         PitchDetectionHandler { result, _ ->
-            try {
-                if(result.pitch >= 0) {
-                    launch {
+            launch {
+                try {
+                    if (result.pitch >= 0) {
                         updateState { it.copy(tuning = getTuning(result.pitch)) }
                     }
+                } catch (e: Exception) {
+                    Crashlytics.logException(e)
+                    e.printStackTrace()
+                    updateState { it.copy(exception = e) }
                 }
-            } catch (e: Exception){
-                Crashlytics.logException(e)
-                e.printStackTrace()
             }
         }
     }
@@ -40,46 +47,53 @@ class TunerViewModel(app: Application) : CoroutineScopedStateViewModel<TunerView
     init {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        initState { TunerViewState(Tuning(), getSettings()) }
+        launch {
+            initState { TunerViewState(Tuning(), getSettings()) }
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
         PreferenceManager.getDefaultSharedPreferences(app).unregisterOnSharedPreferenceChangeListener(this)
-        stopListening()
+        launch {
+            stopListening()
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        updateState { it.copy(settings = getSettings()) }
-        startListening()
+        launch {
+            updateState { it.copy(settings = getSettings()) }
+            startListening()
+        }
     }
 
-    fun startListening(){
+    suspend fun startListening() = withContext(Dispatchers.IO) {
         stopListening()
 
-        val pitchAlgorithm = getSettings().pitchAlgorithm
-        val pitchProcessor = PitchProcessor(pitchAlgorithm, 22050f, 2048, pitchHandler)
-        audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 2048, 0)
-        audioDispatcher.addAudioProcessor(pitchProcessor)
-        launch {
-            withContext(Dispatchers.IO) {
-                audioDispatcher.run()
+        try {
+            audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, AUDIO_BUFFER_SIZE, AUDIO_BUFFER_OVERLAP).also { dispatcher ->
+                val pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), AUDIO_BUFFER_SIZE, pitchHandler)
+                dispatcher.addAudioProcessor(pitchProcessor)
+                dispatcher.run()
             }
+        } catch (e: Exception){
+            Crashlytics.logException(e)
+            e.printStackTrace()
+            updateState { it.copy(exception = e) }
         }
     }
 
-    fun stopListening(){
-        if(::audioDispatcher.isInitialized) {
-            try {
-                audioDispatcher.stop()
-            } catch (e: Exception){
-                Crashlytics.logException(e)
-                e.printStackTrace()
-            }
+    suspend fun stopListening() = withContext(Dispatchers.IO){
+        try {
+            audioDispatcher?.stop()
+        } catch (e: Exception){
+            Crashlytics.logException(e)
+            e.printStackTrace()
+            updateState { it.copy(exception = e) }
         }
     }
 
-    private fun getTuning(frequency: Float): Tuning {
+    private suspend fun getTuning(frequency: Float) = withContext(Dispatchers.Default) {
         var minDeviation = Float.POSITIVE_INFINITY
         var closestNote = ChromaticScale.notes[0]
         for (note in ChromaticScale.notes) {
@@ -89,23 +103,23 @@ class TunerViewModel(app: Application) : CoroutineScopedStateViewModel<TunerView
                 closestNote = note
             }
         }
-        return Tuning(closestNote, frequency, minDeviation.roundToInt())
+        Tuning(closestNote, frequency, minDeviation.roundToInt())
     }
 
-    private fun getSettings(): Settings {
+    private suspend fun getSettings() = withContext(Dispatchers.IO) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(app)
         val basicMode = preferences.getBoolean(Settings.TUNER_BASIC_MODE, false)
         val solfegeNotation = preferences.getString(Settings.TUNER_NOTATION, "0")!!.toInt() == 1
         val flatSymbol = preferences.getString(Settings.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
         val precision = preferences.getString(Settings.TUNER_PRECISION, "2")!!.toInt()
-        val pitchAlgorithm = when(preferences.getString(Settings.TUNER_PITCH_ALGORITHM, "0")!!.toInt()){
+        val pitchAlgorithm = when (preferences.getString(Settings.TUNER_PITCH_ALGORITHM, "0")!!.toInt()) {
             1 -> PitchProcessor.PitchEstimationAlgorithm.FFT_YIN
             2 -> PitchProcessor.PitchEstimationAlgorithm.MPM
             3 -> PitchProcessor.PitchEstimationAlgorithm.AMDF
             4 -> PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET
             else -> PitchProcessor.PitchEstimationAlgorithm.YIN
         }
-        return Settings(basicMode, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
+        Settings(basicMode, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
     }
 
 }

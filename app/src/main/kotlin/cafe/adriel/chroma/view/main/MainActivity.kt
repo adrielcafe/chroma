@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import cafe.adriel.chroma.App
 import cafe.adriel.chroma.BuildConfig
 import cafe.adriel.chroma.R
-import cafe.adriel.chroma.util.CoroutineScopedStateViewModelFactory
+import cafe.adriel.chroma.util.getViewModel
 import cafe.adriel.chroma.util.open
 import cafe.adriel.chroma.util.share
 import cafe.adriel.chroma.view.BaseActivity
@@ -33,9 +33,7 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
         private const val SECTION_INDEX_SETTINGS = 1
     }
 
-    private val viewModel by lazy {
-        CoroutineScopedStateViewModelFactory.getInstance(application).create(MainViewModel::class.java)
-    }
+    override val viewModel by lazy { getViewModel<MainViewModel>(application) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +53,6 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
         val adapter = SectionsPagerAdapter(supportFragmentManager)
         vContent.adapter = adapter
         vContent.offscreenPageLimit = adapter.count
-
-        viewModel.observeState(this, ::onStateUpdated)
     }
 
     override fun onBackPressed() {
@@ -82,17 +78,17 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_tuner -> goToTuner()
-            R.id.nav_settings -> goToSettings()
-            R.id.nav_about -> AboutDialog.show(this@MainActivity)
-            R.id.nav_donate -> DonateDialog.show(this@MainActivity)
-            R.id.nav_share -> shareApp()
-            R.id.nav_rate -> rateApp()
-        }
         vDrawer.postDelayed({
             vDrawer.closeDrawer(GravityCompat.START)
         }, 100)
+        when (item.itemId) {
+            R.id.nav_tuner -> goToTuner()
+            R.id.nav_settings -> goToSettings()
+            R.id.nav_about -> AboutDialog.show(this)
+            R.id.nav_donate -> DonateDialog.show(this)
+            R.id.nav_share -> shareApp()
+            R.id.nav_rate -> rateApp()
+        }
         return true
     }
 
