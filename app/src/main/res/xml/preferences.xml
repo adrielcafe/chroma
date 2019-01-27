@@ -13,7 +13,7 @@
 
         <ListPreference
             android:key="tuner_pitch_algorithm"
-            android:title="@string/pitch_algorithm"
+            android:title="@string/pitch_detection_algorithm"
             android:entries="@array/preference_tuner_pitch_algorithm_entries"
             android:entryValues="@array/preference_tuner_pitch_algorithm_values"
             android:defaultValue="1"
