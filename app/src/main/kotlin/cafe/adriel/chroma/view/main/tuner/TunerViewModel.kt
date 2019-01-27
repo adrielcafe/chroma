@@ -1,5 +1,6 @@
 package cafe.adriel.chroma.view.main.tuner
 
+import android.Manifest
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
@@ -11,6 +12,7 @@ import cafe.adriel.chroma.model.ChromaticScale
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
 import cafe.adriel.chroma.util.StateAndroidViewModel
+import cafe.adriel.chroma.util.hasPermission
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,18 +30,19 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     }
 
     private var audioDispatcher: AudioDispatcher? = null
+    private var pitchProcessor: PitchProcessor? = null
     private val pitchHandler by lazy {
         PitchDetectionHandler { result, _ ->
-            launch {
-                try {
-                    if (result.pitch >= 0) {
+            try {
+                if (result.pitch >= 0) {
+                    launch {
                         updateState { it.copy(tuning = getTuning(result.pitch)) }
                     }
-                } catch (e: Exception) {
-                    Crashlytics.logException(e)
-                    e.printStackTrace()
-                    updateState { it.copy(exception = e) }
                 }
+            } catch (e: Exception) {
+                Crashlytics.logException(e)
+                e.printStackTrace()
+                updateState { it.copy(exception = e) }
             }
         }
     }
@@ -55,26 +58,27 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     override fun onCleared() {
         super.onCleared()
         PreferenceManager.getDefaultSharedPreferences(app).unregisterOnSharedPreferenceChangeListener(this)
-        launch {
-            stopListening()
-        }
+        stopListening()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         launch {
             updateState { it.copy(settings = getSettings()) }
-            startListening()
+            if(app.hasPermission(Manifest.permission.RECORD_AUDIO)) {
+                startListening()
+            }
         }
     }
 
-    suspend fun startListening() = withContext(Dispatchers.IO) {
+    fun startListening() {
         stopListening()
-
         try {
-            audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, AUDIO_BUFFER_SIZE, AUDIO_BUFFER_OVERLAP).also { dispatcher ->
-                val pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), AUDIO_BUFFER_SIZE, pitchHandler)
-                dispatcher.addAudioProcessor(pitchProcessor)
-                dispatcher.run()
+            launch {
+                pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), AUDIO_BUFFER_SIZE, pitchHandler)
+                audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, AUDIO_BUFFER_SIZE, AUDIO_BUFFER_OVERLAP).apply{
+                    addAudioProcessor(pitchProcessor)
+                    Thread(this, "Pitch Tracker").start()
+                }
             }
         } catch (e: Exception){
             Crashlytics.logException(e)
@@ -83,9 +87,14 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
         }
     }
 
-    suspend fun stopListening() = withContext(Dispatchers.IO){
+    fun stopListening() {
         try {
-            audioDispatcher?.stop()
+            audioDispatcher?.apply {
+                removeAudioProcessor(pitchProcessor)
+                stop()
+            }
+            pitchProcessor = null
+            audioDispatcher = null
         } catch (e: Exception){
             Crashlytics.logException(e)
             e.printStackTrace()

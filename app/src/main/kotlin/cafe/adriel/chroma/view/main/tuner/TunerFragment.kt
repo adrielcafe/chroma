@@ -10,10 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.util.color
-import cafe.adriel.chroma.util.getDeviationColorRes
-import cafe.adriel.chroma.util.getViewModel
-import cafe.adriel.chroma.util.showToast
+import cafe.adriel.chroma.util.*
 import cafe.adriel.chroma.view.BaseFragment
 import com.google.android.material.snackbar.Snackbar
 import com.markodevcic.peko.Peko
@@ -23,10 +20,6 @@ import kotlinx.coroutines.launch
 
 class TunerFragment: BaseFragment<TunerViewState>() {
 
-    companion object {
-        private const val REQUEST_SHOW_APP_SETTINGS = 0
-    }
-
     override val viewModel by lazy { getViewModel<TunerViewModel>(requireActivity().application) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -35,21 +28,32 @@ class TunerFragment: BaseFragment<TunerViewState>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        startListening()
+        vGivePermission.setOnClickListener {
+            showExternalAppSettings()
+            it.visibility = View.GONE
+        }
+
+        launch {
+            requestPermission()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (hasPermission(Manifest.permission.RECORD_AUDIO)) {
+            launch {
+                vGivePermission.visibility = View.GONE
+                vDeviationBars.animateBars()
+                viewModel.startListening()
+            }
+        } else {
+            vGivePermission.visibility = View.VISIBLE
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        launch {
-            viewModel.stopListening()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode){
-            REQUEST_SHOW_APP_SETTINGS -> startListening()
-        }
+        viewModel.stopListening()
     }
 
     override fun onStateUpdated(state: TunerViewState) {
@@ -103,29 +107,22 @@ class TunerFragment: BaseFragment<TunerViewState>() {
         }
     }
 
-    private fun startListening(){
-        launch {
-            val snackBar = Snackbar.make(requireView(), getString(R.string.permission_needed), Snackbar.LENGTH_LONG)
-            val snackBarRationale = SnackBarRationale(snackBar, getString(R.string.request_again))
-            val result = Peko.requestPermissionsAsync(requireActivity(), Manifest.permission.RECORD_AUDIO, rationale = snackBarRationale)
-            if (Manifest.permission.RECORD_AUDIO in result.grantedPermissions) {
-                vDeviationBars.animateBars()
-                viewModel.startListening()
-            } else {
-                vGivePermission.visibility = View.VISIBLE
-                vGivePermission.setOnClickListener {
-                    vGivePermission.visibility = View.GONE
-                    showAppSettings()
-                }
-            }
-        }
+    private suspend fun requestPermission(): Boolean {
+        val snackBar = Snackbar.make(requireView(), getString(R.string.permission_needed), Snackbar.LENGTH_LONG)
+        val snackBarRationale = SnackBarRationale(snackBar, getString(R.string.request_again))
+        val result = Peko.requestPermissionsAsync(
+            requireActivity(),
+            Manifest.permission.RECORD_AUDIO,
+            rationale = snackBarRationale
+        )
+        return Manifest.permission.RECORD_AUDIO in result.grantedPermissions
     }
 
-    private fun showAppSettings(){
+    private fun showExternalAppSettings(){
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", requireActivity().packageName, null)
         }
-        startActivityForResult(intent, REQUEST_SHOW_APP_SETTINGS)
+        startActivity(intent)
     }
 
 }
