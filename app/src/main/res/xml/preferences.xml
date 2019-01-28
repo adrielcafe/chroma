@@ -40,7 +40,7 @@
             android:title="@string/precision"
             android:entries="@array/preference_tuner_precision_entries"
             android:entryValues="@array/preference_tuner_precision_values"
-            android:defaultValue="2"
+            android:defaultValue="1"
             app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>

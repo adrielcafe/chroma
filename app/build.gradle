@@ -12,8 +12,8 @@ android {
         applicationId "cafe.adriel.chroma"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.0.3"
         resConfigs 'en', 'pt'
     }
     buildTypes {

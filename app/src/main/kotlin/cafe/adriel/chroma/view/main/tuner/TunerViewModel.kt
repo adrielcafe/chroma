@@ -3,6 +3,8 @@ package cafe.adriel.chroma.view.main.tuner
 import android.Manifest
 import android.app.Application
 import android.content.SharedPreferences
+import android.media.AudioFormat
+import android.media.AudioRecord
 import androidx.preference.PreferenceManager
 import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.io.android.AudioDispatcherFactory
@@ -73,9 +75,10 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     fun startListening() {
         stopListening()
         try {
-            launch {
-                pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), AUDIO_BUFFER_SIZE, pitchHandler)
-                audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, AUDIO_BUFFER_SIZE, AUDIO_BUFFER_OVERLAP).apply{
+            launch(Dispatchers.IO) {
+                val bufferSize = getBufferSize()
+                pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), bufferSize, pitchHandler)
+                audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, bufferSize, AUDIO_BUFFER_OVERLAP).apply{
                     addAudioProcessor(pitchProcessor)
                     Thread(this, "Pitch Tracker").start()
                 }
@@ -129,6 +132,15 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
             else -> PitchProcessor.PitchEstimationAlgorithm.YIN
         }
         Settings(basicMode, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
+    }
+
+    private suspend fun getBufferSize() = withContext(Dispatchers.Default) {
+        val minBufferSize = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+        val minAudioBufferSizeInSamples = minBufferSize / 2
+        if(minAudioBufferSizeInSamples > AUDIO_BUFFER_SIZE)
+            minAudioBufferSizeInSamples
+        else
+            AUDIO_BUFFER_SIZE
     }
 
 }

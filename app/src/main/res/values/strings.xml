@@ -75,13 +75,11 @@
     </string-array>
 
     <string-array name="preference_tuner_precision_entries">
-        <item>0 ct</item>
-        <item>-1/+1 ct</item>
-        <item>-2/+2 ct</item>
-        <item>-5/+5 ct</item>
+        <item>±1 ct</item>
+        <item>±2 ct</item>
+        <item>±5 ct</item>
     </string-array>
     <string-array name="preference_tuner_precision_values">
-        <item>0</item>
         <item>1</item>
         <item>2</item> <!-- Default -->
         <item>5</item>
