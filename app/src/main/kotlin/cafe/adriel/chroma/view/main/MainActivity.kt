@@ -78,9 +78,7 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        vDrawer.postDelayed({
-            vDrawer.closeDrawer(GravityCompat.START)
-        }, 100)
+        vDrawer.postDelayed({ vDrawer.closeDrawer(GravityCompat.START) }, 100)
         when (item.itemId) {
             R.id.nav_tuner -> goToTuner()
             R.id.nav_settings -> goToSettings()

@@ -19,24 +19,39 @@ class DonateView(context: Context, attrs: AttributeSet? = null) : RelativeLayout
     init {
         context.getSystemService<LayoutInflater>()?.inflate(R.layout.view_donate, this, true)?.run {
             updateTextColor(v1Coffee, true)
-            vSlider.setOnDiscreteSliderChangeListener { selectedPosition ->
-                updateTextColor(v1Coffee, false)
-                updateTextColor(v3Coffee, false)
-                updateTextColor(v5Coffee, false)
-                when (selectedPosition) {
-                    0 -> {
-                        selectedProductSku = App.PRODUCT_SKU_COFFEE_1
-                        updateTextColor(v1Coffee, true)
-                    }
-                    1 -> {
-                        selectedProductSku = App.PRODUCT_SKU_COFFEE_3
-                        updateTextColor(v3Coffee, true)
-                    }
-                    2 -> {
-                        selectedProductSku = App.PRODUCT_SKU_COFFEE_5
-                        updateTextColor(v5Coffee, true)
-                    }
-                }
+            vSlider.setOnDiscreteSliderChangeListener(::onOptionSelected)
+            v1Coffee.setOnClickListener {
+                vSlider.position = 0
+                onOptionSelected(vSlider.position)
+            }
+            v3Coffee.setOnClickListener {
+                vSlider.position = 1
+                onOptionSelected(vSlider.position)
+            }
+            v5Coffee.setOnClickListener {
+                vSlider.position = 2
+                onOptionSelected(vSlider.position)
+            }
+
+        }
+    }
+
+    private fun onOptionSelected(position: Int){
+        updateTextColor(v1Coffee, false)
+        updateTextColor(v3Coffee, false)
+        updateTextColor(v5Coffee, false)
+        when (position) {
+            0 -> {
+                selectedProductSku = App.PRODUCT_SKU_COFFEE_1
+                updateTextColor(v1Coffee, true)
+            }
+            1 -> {
+                selectedProductSku = App.PRODUCT_SKU_COFFEE_3
+                updateTextColor(v3Coffee, true)
+            }
+            2 -> {
+                selectedProductSku = App.PRODUCT_SKU_COFFEE_5
+                updateTextColor(v5Coffee, true)
             }
         }
     }

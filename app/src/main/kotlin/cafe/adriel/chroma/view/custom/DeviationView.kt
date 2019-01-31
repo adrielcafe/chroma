@@ -56,7 +56,6 @@ class DeviationView(context: Context, attrs: AttributeSet? = null) : RelativeLay
                 vDeviationZero.setBackgroundColor(deviationColor)
                 vDeviationZero.alpha = ALPHA_ENABLED
             }
-
             deviation <= -50 -> {
                 vDeviationMinus50.setBackgroundColor(deviationColor)
                 vDeviationMinus50.alpha = ALPHA_ENABLED
@@ -65,7 +64,6 @@ class DeviationView(context: Context, attrs: AttributeSet? = null) : RelativeLay
                 vDeviationPlus50.setBackgroundColor(deviationColor)
                 vDeviationPlus50.alpha = ALPHA_ENABLED
             }
-
             deviation < -precision -> deviationBars.forEach { dev, resId ->
                 if (dev < 0 && deviation in dev..dev + 10) {
                     findViewById<View>(resId).let {

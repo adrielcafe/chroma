@@ -148,7 +148,7 @@ enum class ChromaticScale(val tone: String,
             "G" -> "Sol"
             "A" -> "La"
             "B" -> "Si"
-            else -> throw UnsupportedOperationException("Can't convert $tone to Solfège notation")
+            else -> throw UnsupportedOperationException("Can't convert $tone to Solfege notation")
         }
     }
 
