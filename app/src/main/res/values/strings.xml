@@ -17,7 +17,9 @@
     <string name="notation">Notation</string>
     <string name="precision">Precision</string>
     <string name="basic_mode">Basic Mode</string>
-    <string name="hide_secondary_data">Hide secondary data such as octave and frequency.</string>
+    <string name="hides_secondary_data">Hides secondary data such as octave and frequency</string>
+    <string name="noise_suppressor">Noise Suppressor</string>
+    <string name="removes_background_noise">Removes background noise</string>
     <string name="sharp_flat">Sharp/Flat</string>
     <string name="pitch_detection_algorithm">Pitch Detection Algorithm</string>
     <string name="sharp">Sharp (♯)</string>

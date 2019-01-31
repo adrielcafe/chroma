@@ -5,9 +5,12 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.media.audiofx.NoiseSuppressor
 import androidx.preference.PreferenceManager
 import be.tarsos.dsp.AudioDispatcher
-import be.tarsos.dsp.io.android.AudioDispatcherFactory
+import be.tarsos.dsp.io.TarsosDSPAudioFormat
+import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchProcessor
 import cafe.adriel.chroma.model.ChromaticScale
@@ -28,11 +31,12 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     companion object {
         private const val AUDIO_SAMPLE_RATE = 22050
         private const val AUDIO_BUFFER_SIZE = 2048
-        private const val AUDIO_BUFFER_OVERLAP = 0
     }
 
+    private var audioSessionId: Int = -1
     private var audioDispatcher: AudioDispatcher? = null
     private var pitchProcessor: PitchProcessor? = null
+    private var noiseSuppressor: NoiseSuppressor? = null
     private val pitchHandler by lazy {
         PitchDetectionHandler { result, _ ->
             try {
@@ -75,10 +79,15 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     fun startListening() {
         stopListening()
         try {
-            launch(Dispatchers.IO) {
-                val bufferSize = getBufferSize()
-                pitchProcessor = PitchProcessor(getSettings().pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), bufferSize, pitchHandler)
-                audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(AUDIO_SAMPLE_RATE, bufferSize, AUDIO_BUFFER_OVERLAP).apply{
+            launch {
+                val settings = getSettings()
+                pitchProcessor = PitchProcessor(settings.pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), getBufferSize(), pitchHandler)
+                audioDispatcher = getAudioDispatcher().apply {
+                    if(NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
+                        noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+                            .apply { enabled = true }
+                    }
+
                     addAudioProcessor(pitchProcessor)
                     Thread(this, "Pitch Tracker").start()
                 }
@@ -92,10 +101,15 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
 
     fun stopListening() {
         try {
+            noiseSuppressor?.apply {
+                enabled = false
+                release()
+            }
             audioDispatcher?.apply {
                 removeAudioProcessor(pitchProcessor)
                 stop()
             }
+            noiseSuppressor = null
             pitchProcessor = null
             audioDispatcher = null
         } catch (e: Exception){
@@ -120,6 +134,7 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
 
     private suspend fun getSettings() = withContext(Dispatchers.IO) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(app)
+        val noiseSuppressor = preferences.getBoolean(Settings.TUNER_NOISE_SUPPRESSOR, false)
         val basicMode = preferences.getBoolean(Settings.TUNER_BASIC_MODE, false)
         val solfegeNotation = preferences.getString(Settings.TUNER_NOTATION, "0")!!.toInt() == 1
         val flatSymbol = preferences.getString(Settings.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
@@ -131,7 +146,22 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
             4 -> PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET
             else -> PitchProcessor.PitchEstimationAlgorithm.YIN
         }
-        Settings(basicMode, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
+        Settings(basicMode, noiseSuppressor, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
+    }
+
+    private suspend fun getAudioDispatcher() = withContext(Dispatchers.IO) {
+        val bufferSize = getBufferSize()
+        val audioRecord = AudioRecord(
+            MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE,
+            android.media.AudioFormat.CHANNEL_IN_MONO,
+            android.media.AudioFormat.ENCODING_PCM_16BIT,
+            bufferSize * 2
+        )
+        val format = TarsosDSPAudioFormat(AUDIO_SAMPLE_RATE.toFloat(), 16, 1, true, false)
+        val audioStream = AndroidAudioInputStream(audioRecord, format)
+        audioRecord.startRecording()
+        audioSessionId = audioRecord.audioSessionId
+        AudioDispatcher(audioStream, bufferSize, 0)
     }
 
     private suspend fun getBufferSize() = withContext(Dispatchers.Default) {

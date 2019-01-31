@@ -6,7 +6,9 @@
     <string name="notation">Notação</string>
     <string name="precision">Precisão</string>
     <string name="basic_mode">Modo Básico</string>
-    <string name="hide_secondary_data">Ocultar dados secundários, como oitava e frequência.</string>
+    <string name="hides_secondary_data">Oculta dados secundários, como oitava e frequência</string>
+    <string name="noise_suppressor">Supressor de Ruído</string>
+    <string name="removes_background_noise">Remove o ruído de fundo</string>
     <string name="sharp_flat">Sustenido/Bemol</string>
     <string name="pitch_detection_algorithm">Algoritmo de Detecção de Frequência</string>
     <string name="sharp">Sustenido (♯)</string>
