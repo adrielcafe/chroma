@@ -1,37 +1,27 @@
 package cafe.adriel.chroma.view.main
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
-import cafe.adriel.chroma.App
-import cafe.adriel.chroma.BuildConfig
+import androidx.core.view.MenuItemCompat
+import androidx.core.view.forEach
+import androidx.fragment.app.commit
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.util.getViewModel
-import cafe.adriel.chroma.util.open
-import cafe.adriel.chroma.util.share
+import cafe.adriel.chroma.util.tag
 import cafe.adriel.chroma.view.BaseActivity
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
 import cafe.adriel.chroma.view.main.tuner.TunerFragment
-import cafe.adriel.nomanswallpaper.view.main.dialog.AboutDialog
 import cafe.adriel.nomanswallpaper.view.main.dialog.DonateDialog
 import com.etiennelenhart.eiffel.state.peek
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.drawer_header.view.*
 
-class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationItemSelectedListener, DonateDialog.OnDonateListener {
-
-    companion object {
-        private const val SECTION_INDEX_TUNER = 0
-        private const val SECTION_INDEX_SETTINGS = 1
-    }
+class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListener {
 
     override val viewModel by lazy { getViewModel<MainViewModel>(application) }
 
@@ -39,35 +29,19 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(vToolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        vDrawerNav.menu.getItem(0).isChecked = true
-        vDrawerNav.menu.performIdentifierAction(R.id.nav_tuner, 0)
-        vDrawerNav.getHeaderView(0).vAppVersion.text = BuildConfig.VERSION_NAME
-
-        val drawerToggle = ActionBarDrawerToggle(this, vDrawer, vToolbar, R.string.open_menu, R.string.close_menu)
-        vDrawerNav.setNavigationItemSelectedListener(this)
-        vDrawer.addDrawerListener(drawerToggle)
-        drawerToggle.drawerArrowDrawable.color = Color.WHITE
-        drawerToggle.syncState()
-
-        val adapter = SectionsPagerAdapter(supportFragmentManager)
-        vContent.adapter = adapter
-        vContent.offscreenPageLimit = adapter.count
-    }
-
-    override fun onBackPressed() {
-        if (vDrawer.isDrawerOpen(GravityCompat.START)) {
-            vDrawer.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
+        supportFragmentManager.commit {
+            replace(R.id.vContent, TunerFragment(), tag<TunerFragment>())
+            replace(R.id.vSettingsNav, SettingsFragment(), tag<SettingsFragment>())
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        when(vContent?.currentItem){
-            0 -> goToTuner()
-            1 -> goToSettings()
+    override fun onBackPressed() {
+        if (vDrawer.isDrawerOpen(GravityCompat.END)) {
+            vDrawer.closeDrawer(GravityCompat.END)
+        } else {
+            super.onBackPressed()
         }
     }
 
@@ -77,30 +51,30 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        vDrawer.postDelayed({ vDrawer.closeDrawer(GravityCompat.START) }, 100)
-        when (item.itemId) {
-            R.id.nav_tuner -> goToTuner()
-            R.id.nav_settings -> goToSettings()
-            R.id.nav_about -> AboutDialog.show(this)
-            R.id.nav_donate -> DonateDialog.show(this)
-            R.id.nav_share -> shareApp()
-            R.id.nav_rate -> rateApp()
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        menu?.forEach {
+            MenuItemCompat.setIconTintList(it, ColorStateList.valueOf(Color.WHITE))
         }
         return true
     }
 
-    override fun onDonate(sku: String) {
-        viewModel.donate(this, sku)
+    override fun onOptionsItemSelected(item: MenuItem?) = when(item?.itemId){
+        R.id.settings -> {
+            vDrawer.openDrawer(GravityCompat.END)
+            true
+        }
+        else -> false
     }
 
     override fun onStateUpdated(state: MainViewState) {
         state.event?.peek {
             when(it){
                 is MainViewEvent.BillingSupportedEvent -> {
-                    vDrawerNav.menu
-                        .findItem(R.id.nav_donate)
-                        .isVisible = it.supported
+                    val frag = supportFragmentManager.findFragmentByTag(tag<SettingsFragment>())
+                    if(frag is SettingsFragment){
+                        frag.setBillingSupported(it.supported)
+                    }
                     true
                 }
                 is MainViewEvent.PurchaseCompletedEvent -> {
@@ -111,42 +85,9 @@ class MainActivity : BaseActivity<MainViewState>(), NavigationView.OnNavigationI
         }
     }
 
-    private fun goToTuner() {
-        vToolbar.title = getString(R.string.tuner)
-        vContent.currentItem = SECTION_INDEX_TUNER
-        vDrawerNav.menu.getItem(SECTION_INDEX_TUNER).isChecked = true
-    }
-
-    private fun goToSettings() {
-        vToolbar.title = getString(R.string.settings)
-        vContent.currentItem = SECTION_INDEX_SETTINGS
-        vDrawerNav.menu.getItem(SECTION_INDEX_SETTINGS).isChecked = true
-    }
-
-    private fun shareApp() {
-        "${getString(R.string.you_should_try)}\n${App.PLAY_STORE_URL}".share(this)
-    }
-
-    private fun rateApp() {
-        showAppInPlayStore()
-    }
-
-    private fun showAppInPlayStore() {
-        try {
-            Uri.parse(App.MARKET_URL).open(this)
-        } catch (e: Exception) {
-            Uri.parse(App.PLAY_STORE_URL).open(this)
-        }
-    }
-
-    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-
-        private val sections by lazy { listOf(TunerFragment(), SettingsFragment()) }
-
-        override fun getItem(position: Int) = sections[position]
-
-        override fun getCount() = sections.size
-
+    override fun onDonate(sku: String) {
+        vDrawer.closeDrawer(GravityCompat.END)
+        viewModel.donate(this, sku)
     }
 
 }

@@ -18,6 +18,7 @@ import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
 import cafe.adriel.chroma.util.StateAndroidViewModel
 import cafe.adriel.chroma.util.hasPermission
+import cafe.adriel.chroma.view.main.settings.SettingsFragment
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -141,12 +142,12 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
 
     private suspend fun getSettings() = withContext(Dispatchers.IO) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(app)
-        val noiseSuppressor = preferences.getBoolean(Settings.TUNER_NOISE_SUPPRESSOR, false)
-        val basicMode = preferences.getBoolean(Settings.TUNER_BASIC_MODE, false)
-        val solfegeNotation = preferences.getString(Settings.TUNER_NOTATION, "0")!!.toInt() == 1
-        val flatSymbol = preferences.getString(Settings.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
-        val precision = preferences.getString(Settings.TUNER_PRECISION, "2")!!.toInt()
-        val pitchAlgorithm = when (preferences.getString(Settings.TUNER_PITCH_ALGORITHM, "0")!!.toInt()) {
+        val noiseSuppressor = preferences.getBoolean(SettingsFragment.TUNER_NOISE_SUPPRESSOR, false)
+        val basicMode = preferences.getBoolean(SettingsFragment.TUNER_BASIC_MODE, false)
+        val solfegeNotation = preferences.getString(SettingsFragment.TUNER_NOTATION, "0")!!.toInt() == 1
+        val flatSymbol = preferences.getString(SettingsFragment.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
+        val precision = preferences.getString(SettingsFragment.TUNER_PRECISION, "2")!!.toInt()
+        val pitchAlgorithm = when (preferences.getString(SettingsFragment.TUNER_PITCH_ALGORITHM, "0")!!.toInt()) {
             1 -> PitchProcessor.PitchEstimationAlgorithm.FFT_YIN
             2 -> PitchProcessor.PitchEstimationAlgorithm.MPM
             3 -> PitchProcessor.PitchEstimationAlgorithm.AMDF

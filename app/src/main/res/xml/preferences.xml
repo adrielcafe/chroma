@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/tuner">
+    <PreferenceCategory android:title="@string/settings">
 
         <SwitchPreferenceCompat
             android:key="tuner_basic_mode"
@@ -48,6 +48,30 @@
             android:entryValues="@array/preference_tuner_precision_values"
             android:defaultValue="1"
             app:useSimpleSummaryProvider="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory>
+
+        <Preference
+            android:key="about_about"
+            android:title="@string/about"
+            android:icon="@drawable/ic_person"/>
+
+        <Preference
+            android:key="about_buy_me_coffee"
+            android:title="@string/buy_me_coffee"
+            android:icon="@drawable/ic_free_breakfast"/>
+
+        <Preference
+            android:key="about_share"
+            android:title="@string/share"
+            android:icon="@drawable/ic_share"/>
+
+        <Preference
+            android:key="about_rate_review"
+            android:title="@string/rate_review"
+            android:icon="@drawable/ic_star"/>
 
     </PreferenceCategory>
 

@@ -1,6 +1,5 @@
 package cafe.adriel.chroma.util
 
-import android.app.Activity
 import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
@@ -15,11 +14,14 @@ import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import cafe.adriel.chroma.R
 import com.crashlytics.android.Crashlytics
 
 val Int.px: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+inline fun <reified T: Any> tag(): String = T::class.java.simpleName
 
 fun Context.color(@ColorRes resId: Int) = ResourcesCompat.getColor(resources, resId, theme)
 fun Fragment.color(@ColorRes resId: Int) = context?.color(resId) ?: Color.TRANSPARENT
@@ -41,7 +43,7 @@ fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
     e.printStackTrace()
 }
 
-fun String.share(activity: Activity) =
+fun String.share(activity: FragmentActivity) =
     ShareCompat.IntentBuilder
         .from(activity)
         .setText(this)

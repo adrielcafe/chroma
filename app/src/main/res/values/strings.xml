@@ -12,7 +12,6 @@
     <string name="a_b_c" translatable="false">A B C</string>
     <string name="do_re_mi" translatable="false">Do Re Mi</string>
 
-    <string name="tuner">Tuner</string>
     <string name="settings">Settings</string>
     <string name="notation">Notation</string>
     <string name="precision">Precision</string>
@@ -30,13 +29,11 @@
     <string name="permission_needed">Permission needed to continue</string>
     <string name="hi_there_are_you_enjoying_the_app">Hi there! Are you enjoying the app? I hope so 😊\n\nIf you have any question, suggestion or want to contribute (new content, found a bug, translation…) please contact me using the links below.</string>
     <string name="this_app_is_open_source">This app is open source, contributions are very welcome!</string>
-    <string name="open_menu">Open menu</string>
-    <string name="close_menu">Close menu</string>
     <string name="about">About</string>
     <string name="buy_me_coffee">Buy Me A Coffee</string>
     <string name="share">Share</string>
     <string name="rate_review">Rate &amp; Review</string>
-    <string name="you_should_try">You should try Chroma, this chromatic tuner is awesome!</string>
+    <string name="you_should_try">You should try Chroma app, this chromatic tuner is awesome!</string>
     <string name="thanks_for_support">Thank you for your support! ☕ 😋</string>
     <string name="later">Later</string>
     <string name="donate">Donate</string>

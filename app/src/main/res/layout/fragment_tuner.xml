@@ -35,7 +35,7 @@
         app:fontFamily="@font/noto_sans"
         app:layout_constraintBottom_toTopOf="@+id/lineH45"
         app:layout_constraintEnd_toStartOf="@+id/lineV60"
-        tools:text="C" />
+        tools:text="B" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/vSemitone"

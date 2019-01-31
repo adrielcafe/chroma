@@ -7,7 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start"
     tools:context=".view.main.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -26,12 +25,25 @@
                 android:id="@+id/vToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
-                android:background="@android:color/transparent"
-                tools:title="@string/tuner"/>
+                android:background="@android:color/transparent">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:includeFontPadding="false"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"        android:textColor="@color/colorAccent"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="1"
+                    android:shadowColor="@android:color/black"
+                    app:fontFamily="@font/pacifico" />
+
+            </androidx.appcompat.widget.Toolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <cafe.adriel.chroma.view.custom.NonSwipeableViewPager
+        <FrameLayout
             android:id="@+id/vContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -39,17 +51,11 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/vDrawerNav"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/vSettingsNav"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        android:background="@color/colorPrimary"
-        app:menu="@menu/drawer_nav"
-        app:headerLayout="@layout/drawer_header"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
-        app:itemBackground="@drawable/bg_drawer_item"/>
+        android:layout_gravity="end"
+        android:background="@color/colorPrimary"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
