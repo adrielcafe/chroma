@@ -42,6 +42,7 @@ class TunerFragment: BaseFragment<TunerViewState>() {
         super.onResume()
         if (hasPermission(Manifest.permission.RECORD_AUDIO)) {
             launch {
+                vGivePermission.visibility = View.GONE
                 if(vMakeNoise.visibility == View.VISIBLE) {
                     vDeviationBars.animateBars()
                 }
