@@ -83,11 +83,7 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
                 val settings = getSettings()
                 pitchProcessor = PitchProcessor(settings.pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), getBufferSize(), pitchHandler)
                 audioDispatcher = getAudioDispatcher().apply {
-                    if(NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
-                        noiseSuppressor = NoiseSuppressor.create(audioSessionId)
-                            .apply { enabled = true }
-                    }
-
+                    startNoiseSuppressor(settings)
                     addAudioProcessor(pitchProcessor)
                     Thread(this, "Pitch Tracker").start()
                 }
@@ -101,10 +97,7 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
 
     fun stopListening() {
         try {
-            noiseSuppressor?.apply {
-                enabled = false
-                release()
-            }
+            stopNoiseSuppressor()
             audioDispatcher?.apply {
                 removeAudioProcessor(pitchProcessor)
                 stop()
@@ -116,6 +109,20 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
             Crashlytics.logException(e)
             e.printStackTrace()
             updateState { it.copy(exception = e) }
+        }
+    }
+
+    private fun startNoiseSuppressor(settings: Settings){
+        if(NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
+            noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+                .apply { enabled = true }
+        }
+    }
+
+    private fun stopNoiseSuppressor(){
+        noiseSuppressor?.apply {
+            enabled = false
+            release()
         }
     }
 
