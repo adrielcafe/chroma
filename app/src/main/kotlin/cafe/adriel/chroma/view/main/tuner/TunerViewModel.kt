@@ -81,9 +81,9 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
         stopListening()
         try {
             launch {
-                val settings = getSettings()
-                pitchProcessor = PitchProcessor(settings.pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), getBufferSize(), pitchHandler)
                 audioDispatcher = getAudioDispatcher().apply {
+                    val settings = getSettings()
+                    pitchProcessor = PitchProcessor(settings.pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), getBufferSize(), pitchHandler)
                     startNoiseSuppressor(settings)
                     addAudioProcessor(pitchProcessor)
                     Thread(this, "Pitch Tracker").start()
