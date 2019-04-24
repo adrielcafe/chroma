@@ -11,8 +11,8 @@ import cafe.adriel.chroma.App
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.util.open
 import cafe.adriel.chroma.util.share
-import cafe.adriel.nomanswallpaper.view.main.dialog.AboutDialog
-import cafe.adriel.nomanswallpaper.view.main.dialog.DonateDialog
+import cafe.adriel.chroma.view.main.dialog.AboutDialog
+import cafe.adriel.chroma.view.main.dialog.DonateDialog
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -34,22 +34,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
         if(!NoiseSuppressor.isAvailable()) {
-            preferenceScreen[TUNER_NOISE_SUPPRESSOR].isVisible = false
+            preferenceScreen.get<Preference>(TUNER_NOISE_SUPPRESSOR)?.isVisible = false
         }
 
-        findPreference<Preference>(ABOUT_ABOUT).setOnPreferenceClickListener {
+        findPreference<Preference>(ABOUT_ABOUT)?.setOnPreferenceClickListener {
             AboutDialog.show(requireContext())
             true
         }
-        findPreference<Preference>(ABOUT_BUY_ME_COFFEE).setOnPreferenceClickListener {
+        findPreference<Preference>(ABOUT_BUY_ME_COFFEE)?.setOnPreferenceClickListener {
             DonateDialog.show(requireContext())
             true
         }
-        findPreference<Preference>(ABOUT_SHARE).setOnPreferenceClickListener {
+        findPreference<Preference>(ABOUT_SHARE)?.setOnPreferenceClickListener {
             shareApp()
             true
         }
-        findPreference<Preference>(ABOUT_RATE_REVIEW).setOnPreferenceClickListener {
+        findPreference<Preference>(ABOUT_RATE_REVIEW)?.setOnPreferenceClickListener {
             rateApp()
             true
         }
@@ -67,7 +67,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     fun setBillingSupported(supported: Boolean){
-        findPreference<Preference>(ABOUT_BUY_ME_COFFEE).isVisible = supported
+        findPreference<Preference>(ABOUT_BUY_ME_COFFEE)?.isVisible = supported
     }
 
     private fun updatePreferenceIcon(preference: Preference) {

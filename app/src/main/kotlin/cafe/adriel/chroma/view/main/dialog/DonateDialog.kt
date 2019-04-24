@@ -1,4 +1,4 @@
-package cafe.adriel.nomanswallpaper.view.main.dialog
+package cafe.adriel.chroma.view.main.dialog
 
 import android.content.Context
 import androidx.appcompat.app.AlertDialog

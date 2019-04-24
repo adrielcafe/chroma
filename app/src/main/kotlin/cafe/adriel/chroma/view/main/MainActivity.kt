@@ -14,9 +14,9 @@ import cafe.adriel.chroma.R
 import cafe.adriel.chroma.util.getViewModel
 import cafe.adriel.chroma.util.tag
 import cafe.adriel.chroma.view.BaseActivity
+import cafe.adriel.chroma.view.main.dialog.DonateDialog
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
 import cafe.adriel.chroma.view.main.tuner.TunerFragment
-import cafe.adriel.nomanswallpaper.view.main.dialog.DonateDialog
 import com.etiennelenhart.eiffel.state.peek
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*

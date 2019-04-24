@@ -141,28 +141,30 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
     }
 
     private suspend fun getSettings() = withContext(Dispatchers.IO) {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(app)
-        val noiseSuppressor = preferences.getBoolean(SettingsFragment.TUNER_NOISE_SUPPRESSOR, false)
-        val basicMode = preferences.getBoolean(SettingsFragment.TUNER_BASIC_MODE, false)
-        val solfegeNotation = preferences.getString(SettingsFragment.TUNER_NOTATION, "0")!!.toInt() == 1
-        val flatSymbol = preferences.getString(SettingsFragment.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
-        val precision = preferences.getString(SettingsFragment.TUNER_PRECISION, "2")!!.toInt()
-        val pitchAlgorithm = when (preferences.getString(SettingsFragment.TUNER_PITCH_ALGORITHM, "0")!!.toInt()) {
-            1 -> PitchProcessor.PitchEstimationAlgorithm.FFT_YIN
-            2 -> PitchProcessor.PitchEstimationAlgorithm.MPM
-            3 -> PitchProcessor.PitchEstimationAlgorithm.AMDF
-            4 -> PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET
-            else -> PitchProcessor.PitchEstimationAlgorithm.YIN
+        PreferenceManager.getDefaultSharedPreferences(app).run {
+            val noiseSuppressor = getBoolean(SettingsFragment.TUNER_NOISE_SUPPRESSOR, false)
+            val basicMode = getBoolean(SettingsFragment.TUNER_BASIC_MODE, false)
+            val solfegeNotation = getString(SettingsFragment.TUNER_NOTATION, "0")!!.toInt() == 1
+            val flatSymbol = getString(SettingsFragment.TUNER_SHARP_FLAT, "0")!!.toInt() == 1
+            val precision = getString(SettingsFragment.TUNER_PRECISION, "2")!!.toInt()
+            val pitchAlgorithm = when (getString(SettingsFragment.TUNER_PITCH_ALGORITHM, "0")!!.toInt()) {
+                1 -> PitchProcessor.PitchEstimationAlgorithm.FFT_YIN
+                2 -> PitchProcessor.PitchEstimationAlgorithm.MPM
+                3 -> PitchProcessor.PitchEstimationAlgorithm.AMDF
+                4 -> PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET
+                else -> PitchProcessor.PitchEstimationAlgorithm.YIN
+            }
+            Settings(basicMode, noiseSuppressor, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
         }
-        Settings(basicMode, noiseSuppressor, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
     }
 
     private suspend fun getAudioDispatcher() = withContext(Dispatchers.IO) {
         val bufferSize = getBufferSize()
         val audioRecord = AudioRecord(
-            MediaRecorder.AudioSource.MIC, AUDIO_SAMPLE_RATE,
-            android.media.AudioFormat.CHANNEL_IN_MONO,
-            android.media.AudioFormat.ENCODING_PCM_16BIT,
+            MediaRecorder.AudioSource.MIC,
+            AUDIO_SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
             bufferSize * 2
         )
         val format = TarsosDSPAudioFormat(AUDIO_SAMPLE_RATE.toFloat(), 16, 1, true, false)

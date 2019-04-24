@@ -23,7 +23,7 @@ class TunerFragment: BaseFragment<TunerViewState>() {
     override val viewModel by lazy { getViewModel<TunerViewModel>(requireActivity().application) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(cafe.adriel.chroma.R.layout.fragment_tuner, container, false)
+        return inflater.inflate(R.layout.fragment_tuner, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
