@@ -13,6 +13,12 @@ import kotlinx.android.synthetic.main.view_donate.view.*
 
 class DonateView(context: Context, attrs: AttributeSet? = null) : RelativeLayout(context, attrs) {
 
+    companion object {
+        private const val PRODUCT_1_POSITION = 0
+        private const val PRODUCT_2_POSITION = 1
+        private const val PRODUCT_3_POSITION = 2
+    }
+
     var selectedProductSku = App.PRODUCT_SKU_COFFEE_1
         private set
 
@@ -21,35 +27,34 @@ class DonateView(context: Context, attrs: AttributeSet? = null) : RelativeLayout
             updateTextColor(v1Coffee, true)
             vSlider.setOnDiscreteSliderChangeListener(::onOptionSelected)
             v1Coffee.setOnClickListener {
-                vSlider.position = 0
+                vSlider.position = PRODUCT_1_POSITION
                 onOptionSelected(vSlider.position)
             }
             v3Coffee.setOnClickListener {
-                vSlider.position = 1
+                vSlider.position = PRODUCT_2_POSITION
                 onOptionSelected(vSlider.position)
             }
             v5Coffee.setOnClickListener {
-                vSlider.position = 2
+                vSlider.position = PRODUCT_3_POSITION
                 onOptionSelected(vSlider.position)
             }
-
         }
     }
 
-    private fun onOptionSelected(position: Int){
+    private fun onOptionSelected(position: Int) {
         updateTextColor(v1Coffee, false)
         updateTextColor(v3Coffee, false)
         updateTextColor(v5Coffee, false)
         when (position) {
-            0 -> {
+            PRODUCT_1_POSITION -> {
                 selectedProductSku = App.PRODUCT_SKU_COFFEE_1
                 updateTextColor(v1Coffee, true)
             }
-            1 -> {
+            PRODUCT_2_POSITION -> {
                 selectedProductSku = App.PRODUCT_SKU_COFFEE_3
                 updateTextColor(v3Coffee, true)
             }
-            2 -> {
+            PRODUCT_3_POSITION -> {
                 selectedProductSku = App.PRODUCT_SKU_COFFEE_5
                 updateTextColor(v5Coffee, true)
             }
@@ -61,5 +66,4 @@ class DonateView(context: Context, attrs: AttributeSet? = null) : RelativeLayout
             color(if (selected) R.color.colorAccent else R.color.grey_400)
         )
     }
-
 }

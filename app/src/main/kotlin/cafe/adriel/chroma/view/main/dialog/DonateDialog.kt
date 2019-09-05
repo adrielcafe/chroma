@@ -40,5 +40,4 @@ class DonateDialog private constructor() {
     interface OnDonateListener {
         fun onDonate(sku: String)
     }
-
 }

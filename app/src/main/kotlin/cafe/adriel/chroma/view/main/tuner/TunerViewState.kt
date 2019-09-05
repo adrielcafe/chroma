@@ -4,6 +4,9 @@ import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
 import com.etiennelenhart.eiffel.state.ViewState
 
-data class TunerViewState(val tuning: Tuning,
-                          val settings: Settings,
-                          val exception: Exception? = null) : ViewState
+data class TunerViewState(
+    val tuning: Tuning,
+    val settings: Settings,
+    val event: TunerViewEvent? = null,
+    val exception: Exception? = null
+) : ViewState

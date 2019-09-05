@@ -11,7 +11,6 @@ import androidx.core.view.MenuItemCompat
 import androidx.core.view.forEach
 import androidx.fragment.app.commit
 import cafe.adriel.chroma.R
-import cafe.adriel.chroma.util.getViewModel
 import cafe.adriel.chroma.util.tag
 import cafe.adriel.chroma.view.BaseActivity
 import cafe.adriel.chroma.view.main.dialog.DonateDialog
@@ -20,17 +19,17 @@ import cafe.adriel.chroma.view.main.tuner.TunerFragment
 import com.etiennelenhart.eiffel.state.peek
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import org.rewedigital.katana.androidx.viewmodel.viewModel
 
 class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListener {
 
-    override val viewModel by lazy { getViewModel<MainViewModel>(application) }
+    override val viewModel by viewModel<MainViewModel, MainActivity>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(vToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
         supportFragmentManager.commit {
             replace(R.id.vContent, TunerFragment(), tag<TunerFragment>())
             replace(R.id.vSettingsNav, SettingsFragment(), tag<SettingsFragment>())
@@ -59,7 +58,7 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?) = when(item?.itemId){
+    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
         R.id.settings -> {
             vDrawer.openDrawer(GravityCompat.END)
             true
@@ -69,10 +68,10 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
 
     override fun onStateUpdated(state: MainViewState) {
         state.event?.peek {
-            when(it){
+            when (it) {
                 is MainViewEvent.BillingSupportedEvent -> {
                     val frag = supportFragmentManager.findFragmentByTag(tag<SettingsFragment>())
-                    if(frag is SettingsFragment){
+                    if (frag is SettingsFragment) {
                         frag.setBillingSupported(it.supported)
                     }
                     true
@@ -89,5 +88,4 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
         vDrawer.closeDrawer(GravityCompat.END)
         viewModel.donate(this, sku)
     }
-
 }

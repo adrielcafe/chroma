@@ -1,147 +1,87 @@
 package cafe.adriel.chroma.view.main.tuner
 
-import android.Manifest
-import android.app.Application
 import android.content.SharedPreferences
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
-import android.media.audiofx.NoiseSuppressor
-import androidx.preference.PreferenceManager
-import be.tarsos.dsp.AudioDispatcher
-import be.tarsos.dsp.io.TarsosDSPAudioFormat
-import be.tarsos.dsp.io.android.AndroidAudioInputStream
-import be.tarsos.dsp.pitch.PitchDetectionHandler
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.model.ChromaticScale
+import cafe.adriel.chroma.App
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
-import cafe.adriel.chroma.util.StateAndroidViewModel
-import cafe.adriel.chroma.util.hasPermission
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
 import com.crashlytics.android.Crashlytics
+import com.etiennelenhart.eiffel.viewmodel.StateViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
-import kotlin.math.log2
-import kotlin.math.roundToInt
+import org.rewedigital.katana.Component
+import org.rewedigital.katana.KatanaTrait
 
-class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(app), SharedPreferences.OnSharedPreferenceChangeListener {
+class TunerViewModel(
+    private val preferences: SharedPreferences,
+    private val tunerManager: TunerManager
+) : StateViewModel<TunerViewState>(), KatanaTrait, TunerManager.TunerListener,
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
-    companion object {
-        private const val AUDIO_SAMPLE_RATE = 22050
-        private const val AUDIO_BUFFER_SIZE = 2048
-    }
-
-    private var audioSessionId: Int = -1
-    private var audioDispatcher: AudioDispatcher? = null
-    private var pitchProcessor: PitchProcessor? = null
-    private var noiseSuppressor: NoiseSuppressor? = null
-    private val pitchHandler by lazy {
-        PitchDetectionHandler { result, _ ->
-            try {
-                if (result.pitch >= 0) {
-                    launch {
-                        updateState { it.copy(tuning = getTuning(result.pitch)) }
-                    }
-                }
-            } catch (e: Exception) {
-                Crashlytics.logException(e)
-                e.printStackTrace()
-                updateState { it.copy(exception = e) }
-            }
-        }
-    }
+    override val component = Component(dependsOn = listOf(App.appComponent))
+    override val state = MutableLiveData<TunerViewState>()
 
     init {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        launch {
-            initState { TunerViewState(Tuning(), getSettings()) }
+        preferences.registerOnSharedPreferenceChangeListener(this)
+        tunerManager.listener = this
+
+        viewModelScope.launch {
+            initState { TunerViewState(tuning = Tuning(), settings = getSettings()) }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        PreferenceManager.getDefaultSharedPreferences(app).unregisterOnSharedPreferenceChangeListener(this)
+        preferences.unregisterOnSharedPreferenceChangeListener(this)
         stopListening()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        launch {
-            updateState { it.copy(settings = getSettings()) }
-            if(app.hasPermission(Manifest.permission.RECORD_AUDIO)) {
-                startListening()
+        viewModelScope.launch {
+            updateState {
+                it.copy(settings = getSettings(), event = TunerViewEvent.SettingsChangedEvent)
+            }
+        }
+    }
+
+    override fun onTuningDetected(tuning: Tuning) {
+        viewModelScope.launch {
+            updateState {
+                it.copy(tuning = tuning)
+            }
+        }
+    }
+
+    override fun onError(error: Exception) {
+        Crashlytics.logException(error)
+        error.printStackTrace()
+
+        viewModelScope.launch {
+            updateState {
+                it.copy(exception = error)
             }
         }
     }
 
     fun startListening() {
-        stopListening()
-        try {
-            launch {
-                audioDispatcher = getAudioDispatcher().apply {
-                    val settings = getSettings()
-                    pitchProcessor = PitchProcessor(settings.pitchAlgorithm, AUDIO_SAMPLE_RATE.toFloat(), getBufferSize(), pitchHandler)
-                    startNoiseSuppressor(settings)
-                    addAudioProcessor(pitchProcessor)
-                    Thread(this, "Pitch Tracker").start()
-                }
-            }
-        } catch (e: Exception){
-            Crashlytics.logException(e)
-            e.printStackTrace()
-            updateState { it.copy(exception = e) }
+        viewModelScope.launch {
+            tunerManager.stopListening()
+            tunerManager.startListening(getSettings())
         }
     }
 
     fun stopListening() {
-        try {
-            stopNoiseSuppressor()
-            audioDispatcher?.apply {
-                removeAudioProcessor(pitchProcessor)
-                stop()
-            }
-            noiseSuppressor = null
-            pitchProcessor = null
-            audioDispatcher = null
-        } catch (e: Exception){
-            Crashlytics.logException(e)
-            e.printStackTrace()
-            updateState { it.copy(exception = e) }
+        viewModelScope.launch {
+            tunerManager.stopListening()
         }
-    }
-
-    private fun startNoiseSuppressor(settings: Settings){
-        if(NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
-            noiseSuppressor = NoiseSuppressor.create(audioSessionId)
-                .apply { enabled = true }
-        }
-    }
-
-    private fun stopNoiseSuppressor(){
-        noiseSuppressor?.apply {
-            enabled = false
-            release()
-        }
-    }
-
-    private suspend fun getTuning(frequency: Float) = withContext(Dispatchers.Default) {
-        var minDeviation = Float.POSITIVE_INFINITY
-        var closestNote = ChromaticScale.notes[0]
-        for (note in ChromaticScale.notes) {
-            val deviation = 1200 * log2(frequency / note.frequency)
-            if (abs(deviation) < abs(minDeviation)) {
-                minDeviation = deviation
-                closestNote = note
-            }
-        }
-        Tuning(closestNote, frequency, minDeviation.roundToInt())
     }
 
     private suspend fun getSettings() = withContext(Dispatchers.IO) {
-        PreferenceManager.getDefaultSharedPreferences(app).run {
+        preferences.run {
             val noiseSuppressor = getBoolean(SettingsFragment.TUNER_NOISE_SUPPRESSOR, false)
             val basicMode = getBoolean(SettingsFragment.TUNER_BASIC_MODE, false)
             val solfegeNotation = getString(SettingsFragment.TUNER_NOTATION, "0")!!.toInt() == 1
@@ -154,33 +94,8 @@ class TunerViewModel(app: Application) : StateAndroidViewModel<TunerViewState>(a
                 4 -> PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET
                 else -> PitchProcessor.PitchEstimationAlgorithm.YIN
             }
+
             Settings(basicMode, noiseSuppressor, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
         }
     }
-
-    private suspend fun getAudioDispatcher() = withContext(Dispatchers.IO) {
-        val bufferSize = getBufferSize()
-        val audioRecord = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            AUDIO_SAMPLE_RATE,
-            AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            bufferSize * 2
-        )
-        val format = TarsosDSPAudioFormat(AUDIO_SAMPLE_RATE.toFloat(), 16, 1, true, false)
-        val audioStream = AndroidAudioInputStream(audioRecord, format)
-        audioRecord.startRecording()
-        audioSessionId = audioRecord.audioSessionId
-        AudioDispatcher(audioStream, bufferSize, 0)
-    }
-
-    private suspend fun getBufferSize() = withContext(Dispatchers.Default) {
-        val minBufferSize = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
-        val minAudioBufferSizeInSamples = minBufferSize / 2
-        if(minAudioBufferSizeInSamples > AUDIO_BUFFER_SIZE)
-            minAudioBufferSizeInSamples
-        else
-            AUDIO_BUFFER_SIZE
-    }
-
 }

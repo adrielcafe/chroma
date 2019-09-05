@@ -2,9 +2,15 @@ package cafe.adriel.chroma
 
 import android.app.Application
 import androidx.preference.PreferenceManager
+import cafe.adriel.chroma.di.appModule
 import com.github.ajalt.timberkt.Timber
+import org.rewedigital.katana.Component
+import org.rewedigital.katana.Katana
+import org.rewedigital.katana.android.AndroidKatanaLogger
+import org.rewedigital.katana.android.environment.AndroidEnvironmentContext
+import org.rewedigital.katana.android.modules.createApplicationModule
 
-class App: Application() {
+class App : Application() {
 
     companion object {
         // Contact Links
@@ -22,14 +28,34 @@ class App: Application() {
         const val PRODUCT_SKU_COFFEE_1 = "coffee_1"
         const val PRODUCT_SKU_COFFEE_3 = "coffee_3"
         const val PRODUCT_SKU_COFFEE_5 = "coffee_5"
+
+        // DI
+        lateinit var appComponent: Component
     }
 
     override fun onCreate() {
         super.onCreate()
-        if (!BuildConfig.RELEASE) {
-            Timber.plant(Timber.DebugTree())
-        }
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+        initLogger()
+        initDependencies()
+        initPreferences()
     }
 
+    private fun initLogger() {
+        if (!BuildConfig.RELEASE) {
+            Katana.logger = AndroidKatanaLogger
+            Timber.plant(Timber.DebugTree())
+        }
+    }
+
+    private fun initDependencies() {
+        Katana.environmentContext = AndroidEnvironmentContext()
+        appComponent = Component(
+            createApplicationModule(this),
+            appModule
+        )
+    }
+
+    private fun initPreferences() {
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+    }
 }

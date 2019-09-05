@@ -21,22 +21,26 @@ import com.crashlytics.android.Crashlytics
 val Int.px: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
-inline fun <reified T: Any> tag(): String = T::class.java.simpleName
+inline fun <reified T : Any> tag(): String = T::class.java.simpleName
 
 fun Context.color(@ColorRes resId: Int) = ResourcesCompat.getColor(resources, resId, theme)
 fun Fragment.color(@ColorRes resId: Int) = context?.color(resId) ?: Color.TRANSPARENT
 fun View.color(@ColorRes resId: Int) = context.color(resId)
 
-fun Context.showToast(message: String, length: Int = Toast.LENGTH_SHORT) = Toast.makeText(this, message, length).show()
-fun Fragment.showToast(message: String, length: Int = Toast.LENGTH_SHORT) = context?.showToast(message, length)
+fun Context.showToast(message: String, length: Int = Toast.LENGTH_SHORT) =
+    Toast.makeText(this, message, length).show()
+fun Fragment.showToast(message: String, length: Int = Toast.LENGTH_SHORT) =
+    context?.showToast(message, length)
 
-fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-fun Fragment.hasPermission(permission: String) = context?.hasPermission(permission) ?: false
+fun Context.hasPermission(permission: String) =
+    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+fun Fragment.hasPermission(permission: String) =
+    context?.hasPermission(permission) ?: false
 
 fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
     context.startActivity(Intent(Intent.ACTION_VIEW, this))
 } catch (e: Exception) {
-    if(showErrorMessage) {
+    if (showErrorMessage) {
         context.showToast(context.getString(R.string.something_went_wrong))
     }
     Crashlytics.logException(e)
@@ -50,7 +54,8 @@ fun String.share(activity: FragmentActivity) =
         .setType(ClipDescription.MIMETYPE_TEXT_PLAIN)
         .startChooser()
 
-fun getDeviationColorRes(deviation: Int, precision: Int) =
-    if(deviation in -precision..precision) R.color.green
-    else if(deviation in -20..-precision || deviation in precision..20) R.color.yellow
-    else R.color.red
+fun getDeviationColorRes(deviation: Int, precision: Int) = when (deviation) {
+    in -precision..precision -> R.color.green
+    in -20..-precision, in precision..20 -> R.color.yellow
+    else -> R.color.red
+}

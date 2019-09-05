@@ -1,26 +1,35 @@
 buildscript {
-    ext.kotlin_version = '1.3.30'
+    ext.kotlin_version = '1.3.50'
     repositories {
         google()
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath "com.google.gms:google-services:4.2.0"
-        classpath 'com.google.firebase:firebase-plugins:1.2.0'
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.google.gms:google-services:4.3.1'
+        classpath 'com.google.firebase:perf-plugin:1.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.github.ben-manes:gradle-versions-plugin:0.21.0"
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.22.0'
+        classpath 'org.jlleitschuh.gradle:ktlint-gradle:8.2.0'
         classpath 'io.fabric.tools:gradle:1.28.1'
     }
 }
 
 allprojects {
+    apply plugin: 'com.github.ben-manes.versions'
+    apply plugin: "org.jlleitschuh.gradle.ktlint"
+    
     repositories {
         google()
         jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+    }
+    ktlint {
+        version = "0.34.2"
+        android = true
     }
 }
 

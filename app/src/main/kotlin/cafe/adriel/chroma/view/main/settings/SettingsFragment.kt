@@ -5,7 +5,12 @@ import android.media.audiofx.NoiseSuppressor
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.preference.*
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceGroup
+import androidx.preference.PreferenceScreen
+import androidx.preference.forEach
+import androidx.preference.get
 import androidx.recyclerview.widget.RecyclerView
 import cafe.adriel.chroma.App
 import cafe.adriel.chroma.R
@@ -33,7 +38,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        if(!NoiseSuppressor.isAvailable()) {
+        if (!NoiseSuppressor.isAvailable()) {
             preferenceScreen.get<Preference>(TUNER_NOISE_SUPPRESSOR)?.isVisible = false
         }
 
@@ -66,7 +71,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.setPreferenceScreen(preferenceScreen)
     }
 
-    fun setBillingSupported(supported: Boolean){
+    fun setBillingSupported(supported: Boolean) {
         findPreference<Preference>(ABOUT_BUY_ME_COFFEE)?.isVisible = supported
     }
 
@@ -91,5 +96,4 @@ class SettingsFragment : PreferenceFragmentCompat() {
             Uri.parse(App.PLAY_STORE_URL).open(requireContext())
         }
     }
-
 }
