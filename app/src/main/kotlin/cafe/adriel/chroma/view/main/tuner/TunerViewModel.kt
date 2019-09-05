@@ -37,6 +37,8 @@ class TunerViewModel(
     override fun onCleared() {
         super.onCleared()
         preferences.unregisterOnSharedPreferenceChangeListener(this)
+        tunerManager.listener = null
+
         stopListening()
     }
 

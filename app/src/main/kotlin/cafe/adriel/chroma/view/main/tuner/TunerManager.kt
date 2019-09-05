@@ -5,20 +5,22 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
 import be.tarsos.dsp.AudioDispatcher
+import be.tarsos.dsp.AudioEvent
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
 import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
+import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
 import cafe.adriel.chroma.model.ChromaticScale
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.log2
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class TunerManager {
+class TunerManager : PitchDetectionHandler {
 
     companion object {
         private const val SAMPLE_RATE = 22050
@@ -28,18 +30,16 @@ class TunerManager {
         private const val BUFFER_SIZE = 2048
     }
 
-    var listener: TunerListener? = null
-
     private var audioDispatcher: AudioDispatcher? = null
     private var pitchProcessor: PitchProcessor? = null
     private var noiseSuppressor: NoiseSuppressor? = null
 
-    private val pitchHandler by lazy {
-        PitchDetectionHandler { result, _ ->
-            if (result.pitch >= 0) {
-                val tuning = getTuning(result.pitch)
-                listener?.onTuningDetected(tuning)
-            }
+    var listener: TunerListener? = null
+
+    override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
+        val pitch = result?.pitch ?: -1F
+        if (pitch >= 0) {
+            listener?.onTuningDetected(getTuning(pitch))
         }
     }
 
@@ -50,13 +50,15 @@ class TunerManager {
                 startRecording()
             }
 
-            startNoiseSuppressor(settings, audioRecord.audioSessionId)
+            if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
+                startNoiseSuppressor(audioRecord.audioSessionId)
+            }
 
             pitchProcessor = PitchProcessor(
                 settings.pitchAlgorithm,
                 SAMPLE_RATE.toFloat(),
                 bufferSize,
-                pitchHandler
+                this@TunerManager
             )
             audioDispatcher = getAudioDispatcher(audioRecord, bufferSize).apply {
                 addAudioProcessor(pitchProcessor)
@@ -84,9 +86,9 @@ class TunerManager {
         }
     }
 
-    private fun startNoiseSuppressor(settings: Settings, audioSessionId: Int) {
-        if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
-            noiseSuppressor = NoiseSuppressor.create(audioSessionId).apply { enabled = true }
+    private fun startNoiseSuppressor(audioSessionId: Int) {
+        noiseSuppressor = NoiseSuppressor.create(audioSessionId).apply {
+            enabled = true
         }
     }
 
@@ -102,8 +104,8 @@ class TunerManager {
         var closestNote = ChromaticScale.notes.first()
 
         ChromaticScale.notes.forEach { note ->
-            val deviation = getTuningDeviation(note, detectedFrequency)
-            if (abs(deviation) < abs(minDeviation)) {
+            val deviation = getTuningDeviation(note.frequency, detectedFrequency)
+            if (deviation.absoluteValue < minDeviation.absoluteValue) {
                 minDeviation = deviation
                 closestNote = note
             }
@@ -112,8 +114,8 @@ class TunerManager {
         return Tuning(closestNote, detectedFrequency, minDeviation.roundToInt())
     }
 
-    private fun getTuningDeviation(note: ChromaticScale, detectedFrequency: Float) =
-        1200 * log2(detectedFrequency / note.frequency)
+    private fun getTuningDeviation(standardFrequency: Float, detectedFrequency: Float) =
+        1200 * log2(detectedFrequency / standardFrequency)
 
     private fun getAudioDispatcher(audioRecord: AudioRecord, bufferSize: Int): AudioDispatcher {
         val format = TarsosDSPAudioFormat(SAMPLE_RATE.toFloat(), SAMPLE_RATE_BITS, CHANNEL_COUNT, true, false)
