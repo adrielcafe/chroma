@@ -8,8 +8,8 @@ import cafe.adriel.chroma.App
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
-import com.crashlytics.android.Crashlytics
 import com.etiennelenhart.eiffel.viewmodel.StateViewModel
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,7 +19,9 @@ import org.rewedigital.katana.KatanaTrait
 class TunerViewModel(
     private val preferences: SharedPreferences,
     private val tunerManager: TunerManager
-) : StateViewModel<TunerViewState>(), KatanaTrait, TunerManager.TunerListener,
+) : StateViewModel<TunerViewState>(),
+    KatanaTrait,
+    TunerManager.TunerListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
     override val component = Component(dependsOn = listOf(App.appComponent))
@@ -59,7 +61,7 @@ class TunerViewModel(
     }
 
     override fun onError(error: Exception) {
-        Crashlytics.logException(error)
+        FirebaseCrashlytics.getInstance().recordException(error)
         error.printStackTrace()
 
         viewModelScope.launch {

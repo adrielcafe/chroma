@@ -6,12 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import cafe.adriel.chroma.App
 import cafe.adriel.chroma.BuildConfig
-import com.crashlytics.android.Crashlytics
 import com.etiennelenhart.eiffel.viewmodel.StateViewModel
 import com.github.stephenvinouze.core.managers.KinAppManager
 import com.github.stephenvinouze.core.models.KinAppProductType
 import com.github.stephenvinouze.core.models.KinAppPurchase
 import com.github.stephenvinouze.core.models.KinAppPurchaseResult
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.launch
 import org.rewedigital.katana.Component
 import org.rewedigital.katana.KatanaTrait
@@ -42,7 +42,7 @@ class MainViewModel : StateViewModel<MainViewState>(), KatanaTrait, KinAppManage
                 }
                 billingManager.isBillingSupported(KinAppProductType.INAPP)
             } catch (e: Exception) {
-                Crashlytics.logException(e)
+                FirebaseCrashlytics.getInstance().recordException(e)
                 e.printStackTrace()
                 false
             }
@@ -69,7 +69,7 @@ class MainViewModel : StateViewModel<MainViewState>(), KatanaTrait, KinAppManage
         try {
             billingManager.verifyPurchase(requestCode, resultCode, data)
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             e.printStackTrace()
             false
         }

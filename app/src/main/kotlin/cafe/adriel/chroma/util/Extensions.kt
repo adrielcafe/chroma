@@ -16,7 +16,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import cafe.adriel.chroma.R
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 val Int.px: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
@@ -43,7 +43,7 @@ fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
     if (showErrorMessage) {
         context.showToast(context.getString(R.string.something_went_wrong))
     }
-    Crashlytics.logException(e)
+    FirebaseCrashlytics.getInstance().recordException(e)
     e.printStackTrace()
 }
 

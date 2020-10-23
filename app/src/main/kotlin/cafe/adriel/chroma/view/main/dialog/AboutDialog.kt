@@ -13,7 +13,7 @@ import cafe.adriel.chroma.BuildConfig.VERSION_CODE
 import cafe.adriel.chroma.BuildConfig.VERSION_NAME
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.util.open
-import com.crashlytics.android.Crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.dialog_about.*
 
 class AboutDialog private constructor(context: Context) : AppCompatDialog(context) {
@@ -52,13 +52,13 @@ class AboutDialog private constructor(context: Context) : AppCompatDialog(contex
         try {
             val email = Uri.parse("mailto:${App.EMAIL}")
             val subject = "${context.getString(R.string.app_name)} for Android | " +
-                    "v$VERSION_NAME (Build $VERSION_CODE), SDK $SDK_INT"
+                "v$VERSION_NAME (Build $VERSION_CODE), SDK $SDK_INT"
             Intent(Intent.ACTION_SENDTO, email).run {
                 putExtra(Intent.EXTRA_SUBJECT, subject)
                 context.startActivity(this)
             }
         } catch (e: Exception) {
-            Crashlytics.logException(e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             e.printStackTrace()
             Toast.makeText(context, "Oops! No Email app found :/", Toast.LENGTH_LONG).show()
         }

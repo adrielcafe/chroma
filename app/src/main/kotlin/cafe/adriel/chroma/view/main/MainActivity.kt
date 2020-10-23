@@ -58,7 +58,7 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.settings -> {
             vDrawer.openDrawer(GravityCompat.END)
             true

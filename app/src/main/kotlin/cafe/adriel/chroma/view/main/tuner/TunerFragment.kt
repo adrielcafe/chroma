@@ -17,9 +17,8 @@ import cafe.adriel.chroma.util.hasPermission
 import cafe.adriel.chroma.util.showToast
 import cafe.adriel.chroma.view.BaseFragment
 import com.etiennelenhart.eiffel.state.peek
-import com.google.android.material.snackbar.Snackbar
 import com.markodevcic.peko.Peko
-import com.markodevcic.peko.rationale.SnackBarRationale
+import com.markodevcic.peko.PermissionResult
 import kotlinx.android.synthetic.main.fragment_tuner.*
 import kotlinx.coroutines.launch
 import org.rewedigital.katana.androidx.viewmodel.viewModel
@@ -167,13 +166,13 @@ class TunerFragment : BaseFragment<TunerViewState>() {
     }
 
     private suspend fun requestPermission(): Boolean {
-        val snackBar = Snackbar.make(requireView(), getString(R.string.permission_needed), Snackbar.LENGTH_LONG)
-        val snackBarRationale = SnackBarRationale(snackBar, getString(R.string.request_again))
         val result = Peko.requestPermissionsAsync(
             requireActivity(),
-            Manifest.permission.RECORD_AUDIO,
-            rationale = snackBarRationale
+            Manifest.permission.RECORD_AUDIO
         )
-        return Manifest.permission.RECORD_AUDIO in result.grantedPermissions
+        return when (result) {
+            is PermissionResult.Granted -> Manifest.permission.RECORD_AUDIO in result.grantedPermissions
+            else -> false
+        }
     }
 }
