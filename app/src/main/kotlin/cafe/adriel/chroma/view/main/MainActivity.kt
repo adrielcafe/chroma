@@ -6,24 +6,28 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuItemCompat
 import androidx.core.view.forEach
 import androidx.fragment.app.commit
+import androidx.lifecycle.lifecycleScope
 import cafe.adriel.chroma.R
+import cafe.adriel.chroma.manager.BillingManager
 import cafe.adriel.chroma.util.tag
-import cafe.adriel.chroma.view.BaseActivity
 import cafe.adriel.chroma.view.main.dialog.DonateDialog
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
 import cafe.adriel.chroma.view.main.tuner.TunerFragment
-import com.etiennelenhart.eiffel.state.peek
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import org.rewedigital.katana.androidx.viewmodel.viewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.koin.android.ext.android.inject
+import org.koin.androidx.scope.activityScope
 
-class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListener {
+class MainActivity : AppCompatActivity(), DonateDialog.OnDonateListener {
 
-    override val viewModel by viewModel<MainViewModel, MainActivity>()
+    private val billingManager by activityScope().inject<BillingManager>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +38,11 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
             replace(R.id.vContent, TunerFragment(), tag<TunerFragment>())
             replace(R.id.vSettingsNav, SettingsFragment(), tag<SettingsFragment>())
         }
+
+        billingManager
+            .observe(this)
+            .onEach(::handleBillingEvent)
+            .launchIn(lifecycleScope)
     }
 
     override fun onBackPressed() {
@@ -45,7 +54,7 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (!viewModel.verifyDonation(requestCode, resultCode, data)) {
+        if (!billingManager.verifyDonation(requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
@@ -66,26 +75,22 @@ class MainActivity : BaseActivity<MainViewState>(), DonateDialog.OnDonateListene
         else -> false
     }
 
-    override fun onStateUpdated(state: MainViewState) {
-        state.event?.peek {
-            when (it) {
-                is MainViewEvent.BillingSupportedEvent -> {
-                    val frag = supportFragmentManager.findFragmentByTag(tag<SettingsFragment>())
-                    if (frag is SettingsFragment) {
-                        frag.setBillingSupported(it.supported)
-                    }
-                    true
+    private fun handleBillingEvent(event: BillingManager.Event) {
+        when (event) {
+            is BillingManager.Event.BillingSupported -> {
+                val frag = supportFragmentManager.findFragmentByTag(tag<SettingsFragment>())
+                if (frag is SettingsFragment) {
+                    frag.setBillingSupported(event.supported)
                 }
-                is MainViewEvent.PurchaseCompletedEvent -> {
-                    if (it.success) Snackbar.make(vRoot, R.string.thanks_for_support, Snackbar.LENGTH_LONG).show()
-                    true
-                }
+            }
+            is BillingManager.Event.PurchaseCompleted -> {
+                if (event.success) Snackbar.make(vRoot, R.string.thanks_for_support, Snackbar.LENGTH_LONG).show()
             }
         }
     }
 
     override fun onDonate(sku: String) {
         vDrawer.closeDrawer(GravityCompat.END)
-        viewModel.donate(this, sku)
+        billingManager.donate(this, sku)
     }
 }

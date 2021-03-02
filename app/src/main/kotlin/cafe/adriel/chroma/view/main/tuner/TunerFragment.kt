@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.model.ChromaticScale
@@ -15,21 +16,20 @@ import cafe.adriel.chroma.util.color
 import cafe.adriel.chroma.util.getDeviationColorRes
 import cafe.adriel.chroma.util.hasPermission
 import cafe.adriel.chroma.util.showToast
-import cafe.adriel.chroma.view.BaseFragment
-import com.etiennelenhart.eiffel.state.peek
+import cafe.adriel.hal.observeState
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.PermissionResult
 import kotlinx.android.synthetic.main.fragment_tuner.*
 import kotlinx.coroutines.launch
-import org.rewedigital.katana.androidx.viewmodel.viewModel
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class TunerFragment : BaseFragment<TunerViewState>() {
+class TunerFragment : Fragment() {
 
     companion object {
         private const val FREQUENCY_FORMAT = "%.2f"
     }
 
-    override val viewModel by viewModel<TunerViewModel, TunerFragment>()
+    private val viewModel by sharedViewModel<TunerViewModel>()
 
     private val tuningViews by lazy {
         listOf(
@@ -55,7 +55,20 @@ class TunerFragment : BaseFragment<TunerViewState>() {
         stopListening()
     }
 
-    override fun onStateUpdated(state: TunerViewState) {
+    private fun init() {
+        vGivePermission.setOnClickListener {
+            showExternalAppSettings()
+            it.visibility = View.GONE
+        }
+
+        lifecycleScope.launch {
+            requestPermission()
+        }
+
+        viewModel.observeState(lifecycleScope, onStateChanged = ::onStateChanged)
+    }
+
+    private fun onStateChanged(state: TunerState) {
         state.apply {
             tuning.note?.let {
                 updateViewsVisibility(settings.basicMode)
@@ -66,29 +79,9 @@ class TunerFragment : BaseFragment<TunerViewState>() {
                 updateDeviation(tuning.deviation, settings.precision)
             }
 
-            exception?.let {
+            error?.let {
                 showToast("ERROR: ${it.message}")
             }
-
-            event?.peek {
-                when (it) {
-                    is TunerViewEvent.SettingsChangedEvent -> {
-                        viewModel.startListening()
-                        true
-                    }
-                }
-            }
-        }
-    }
-
-    private fun init() {
-        vGivePermission.setOnClickListener {
-            showExternalAppSettings()
-            it.visibility = View.GONE
-        }
-
-        lifecycleScope.launch {
-            requestPermission()
         }
     }
 

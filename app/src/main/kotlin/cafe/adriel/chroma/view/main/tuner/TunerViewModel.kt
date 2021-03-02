@@ -1,39 +1,36 @@
 package cafe.adriel.chroma.view.main.tuner
 
 import android.content.SharedPreferences
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.App
+import cafe.adriel.chroma.manager.TunerManager
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.chroma.model.Tuning
 import cafe.adriel.chroma.view.main.settings.SettingsFragment
-import com.etiennelenhart.eiffel.viewmodel.StateViewModel
+import cafe.adriel.hal.HAL
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.rewedigital.katana.Component
-import org.rewedigital.katana.KatanaTrait
 
 class TunerViewModel(
     private val preferences: SharedPreferences,
     private val tunerManager: TunerManager
-) : StateViewModel<TunerViewState>(),
-    KatanaTrait,
+) : ViewModel(),
+    HAL.StateMachine<TunerAction, TunerState>,
     TunerManager.TunerListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    override val component = Component(dependsOn = listOf(App.appComponent))
-    override val state = MutableLiveData<TunerViewState>()
+    override val stateMachine by HAL(TunerState(settings = getSettings()), viewModelScope) { action, state ->
+        when (action) {
+            is TunerAction.TuningDetected -> +state.copy(tuning = action.tuning, error = null)
+            is TunerAction.TuningDetectionFailed -> +state.copy(tuning = Tuning(), error = action.error)
+            is TunerAction.SettingsChanged -> +state.copy(settings = getSettings(), error = null)
+        }
+    }
 
     init {
         preferences.registerOnSharedPreferenceChangeListener(this)
         tunerManager.listener = this
-
-        viewModelScope.launch {
-            initState { TunerViewState(tuning = Tuning(), settings = getSettings()) }
-        }
     }
 
     override fun onCleared() {
@@ -45,30 +42,18 @@ class TunerViewModel(
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        viewModelScope.launch {
-            updateState {
-                it.copy(settings = getSettings(), event = TunerViewEvent.SettingsChangedEvent)
-            }
-        }
+        stateMachine.emit(TunerAction.SettingsChanged)
     }
 
     override fun onTuningDetected(tuning: Tuning) {
-        viewModelScope.launch {
-            updateState {
-                it.copy(tuning = tuning)
-            }
-        }
+        stateMachine.emit(TunerAction.TuningDetected(tuning))
     }
 
     override fun onError(error: Exception) {
         FirebaseCrashlytics.getInstance().recordException(error)
         error.printStackTrace()
 
-        viewModelScope.launch {
-            updateState {
-                it.copy(exception = error)
-            }
-        }
+        stateMachine.emit(TunerAction.TuningDetectionFailed(error))
     }
 
     fun startListening() {
@@ -84,7 +69,7 @@ class TunerViewModel(
         }
     }
 
-    private suspend fun getSettings() = withContext(Dispatchers.IO) {
+    private fun getSettings() =
         preferences.run {
             val noiseSuppressor = getBoolean(SettingsFragment.TUNER_NOISE_SUPPRESSOR, false)
             val basicMode = getBoolean(SettingsFragment.TUNER_BASIC_MODE, false)
@@ -101,5 +86,4 @@ class TunerViewModel(
 
             Settings(basicMode, noiseSuppressor, solfegeNotation, flatSymbol, precision, pitchAlgorithm)
         }
-    }
 }

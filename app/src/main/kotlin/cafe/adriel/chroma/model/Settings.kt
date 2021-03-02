@@ -1,15 +1,15 @@
 package cafe.adriel.chroma.model
 
 import android.os.Parcelable
-import be.tarsos.dsp.pitch.PitchProcessor
+import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Settings(
-    val basicMode: Boolean,
-    val noiseSuppressor: Boolean,
-    val solfegeNotation: Boolean,
-    val flatSymbol: Boolean,
-    val precision: Int,
-    val pitchAlgorithm: PitchProcessor.PitchEstimationAlgorithm
+    val basicMode: Boolean = false,
+    val noiseSuppressor: Boolean = false,
+    val solfegeNotation: Boolean = false,
+    val flatSymbol: Boolean = false,
+    val precision: Int = 3,
+    val pitchAlgorithm: PitchEstimationAlgorithm = PitchEstimationAlgorithm.FFT_YIN
 ) : Parcelable
