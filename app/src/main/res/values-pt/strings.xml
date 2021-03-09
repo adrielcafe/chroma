@@ -12,10 +12,8 @@
     <string name="pitch_detection_algorithm">Algoritmo de Detecção de Frequência</string>
     <string name="sharp">Sustenido (♯)</string>
     <string name="flat">Bemol (♭)</string>
-    <string name="make_noise">Faça\nAlgum\n<font fgcolor='#1abc9c'>Barulho!</font></string>
-    <string name="give_permission">Dar permissão</string>
-    <string name="request_again">Solicitar novamente</string>
-    <string name="permission_needed">Permissão necessária para continuar</string>
+    <string name="give_permission">Permitir</string>
+    <string name="permission_needed">Permissão necessária</string>
     <string name="hi_there_are_you_enjoying_the_app">Olá! Você está curtindo o app? Espero que sim 😊\n\nSe você tiver alguma dúvida, sugestão ou deseja contribuir (novo conteúdo, encontrou um bug, tradução…) por favor entre em contato comigo usando os links abaixo.</string>
     <string name="this_app_is_open_source">Esse aplicativo é open source, contribuições são muito bem-vindas!</string>
     <string name="about">Sobre</string>

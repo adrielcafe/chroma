@@ -36,8 +36,8 @@ class BillingManager(
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
-            Lifecycle.Event.ON_CREATE -> kin.bind(listener = this)
-            Lifecycle.Event.ON_DESTROY -> kin.unbind()
+            Lifecycle.Event.ON_START -> kin.bind(this)
+            Lifecycle.Event.ON_STOP -> kin.unbind()
         }
     }
 
@@ -50,7 +50,6 @@ class BillingManager(
                 kin.isBillingSupported(KinAppProductType.INAPP)
             } catch (e: Exception) {
                 FirebaseCrashlytics.getInstance().recordException(e)
-                e.printStackTrace()
                 false
             }
 
@@ -75,7 +74,6 @@ class BillingManager(
             kin.verifyPurchase(requestCode, resultCode, data)
         } catch (e: Exception) {
             FirebaseCrashlytics.getInstance().recordException(e)
-            e.printStackTrace()
             false
         }
 

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Color
 import android.net.Uri
 import android.view.View
 import android.widget.Toast
@@ -24,7 +23,7 @@ val Int.px: Int
 inline fun <reified T : Any> tag(): String = T::class.java.simpleName
 
 fun Context.color(@ColorRes resId: Int) = ResourcesCompat.getColor(resources, resId, theme)
-fun Fragment.color(@ColorRes resId: Int) = context?.color(resId) ?: Color.TRANSPARENT
+fun Fragment.color(@ColorRes resId: Int) = context?.color(resId) ?: android.graphics.Color.TRANSPARENT
 fun View.color(@ColorRes resId: Int) = context.color(resId)
 
 fun Context.showToast(message: String, length: Int = Toast.LENGTH_SHORT) =
@@ -44,7 +43,6 @@ fun Uri.open(context: Context, showErrorMessage: Boolean = true) = try {
         context.showToast(context.getString(R.string.something_went_wrong))
     }
     FirebaseCrashlytics.getInstance().recordException(e)
-    e.printStackTrace()
 }
 
 fun String.share(activity: FragmentActivity) =

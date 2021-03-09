@@ -1,9 +1,7 @@
 package cafe.adriel.chroma
 
 import android.app.Application
-import androidx.preference.PreferenceManager
 import cafe.adriel.chroma.di.appModule
-import com.github.ajalt.timberkt.Timber
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -30,15 +28,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        initLogger()
         initDependencies()
-        initPreferences()
-    }
-
-    private fun initLogger() {
-        if (!BuildConfig.RELEASE) {
-            Timber.plant(Timber.DebugTree())
-        }
     }
 
     private fun initDependencies() {
@@ -47,9 +37,5 @@ class App : Application() {
             androidContext(this@App)
             modules(appModule)
         }
-    }
-
-    private fun initPreferences() {
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
     }
 }

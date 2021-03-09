@@ -59,7 +59,6 @@ class AboutDialog private constructor(context: Context) : AppCompatDialog(contex
             }
         } catch (e: Exception) {
             FirebaseCrashlytics.getInstance().recordException(e)
-            e.printStackTrace()
             Toast.makeText(context, "Oops! No Email app found :/", Toast.LENGTH_LONG).show()
         }
     }

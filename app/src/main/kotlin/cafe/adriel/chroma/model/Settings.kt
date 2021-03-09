@@ -6,10 +6,10 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Settings(
-    val basicMode: Boolean = false,
-    val noiseSuppressor: Boolean = false,
-    val solfegeNotation: Boolean = false,
-    val flatSymbol: Boolean = false,
-    val precision: Int = 3,
-    val pitchAlgorithm: PitchEstimationAlgorithm = PitchEstimationAlgorithm.FFT_YIN
+    val basicMode: Boolean,
+    val noiseSuppressor: Boolean,
+    val solfegeNotation: Boolean,
+    val flatSymbol: Boolean,
+    val deviationPrecisionOffset: Int,
+    val pitchAlgorithm: PitchEstimationAlgorithm
 ) : Parcelable

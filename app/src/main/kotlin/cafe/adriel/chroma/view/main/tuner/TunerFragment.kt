@@ -15,8 +15,8 @@ import cafe.adriel.chroma.model.ChromaticScale
 import cafe.adriel.chroma.util.color
 import cafe.adriel.chroma.util.getDeviationColorRes
 import cafe.adriel.chroma.util.hasPermission
-import cafe.adriel.chroma.util.showToast
-import cafe.adriel.hal.observeState
+import cafe.adriel.chroma.view.compose.TunerState
+import cafe.adriel.chroma.view.compose.TunerViewModel
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.PermissionResult
 import kotlinx.android.synthetic.main.fragment_tuner.*
@@ -65,23 +65,11 @@ class TunerFragment : Fragment() {
             requestPermission()
         }
 
-        viewModel.observeState(lifecycleScope, onStateChanged = ::onStateChanged)
     }
 
     private fun onStateChanged(state: TunerState) {
         state.apply {
-            tuning.note?.let {
-                updateViewsVisibility(settings.basicMode)
-                updateTone(tuning.note.tone, tuning.note.semitone, settings.flatSymbol, settings.solfegeNotation)
-                updateSemitone(tuning.note.semitone, settings.flatSymbol)
-                updateOctave(tuning.note.octave)
-                updateFrequency(tuning.note.frequency, tuning.frequency)
-                updateDeviation(tuning.deviation, settings.precision)
-            }
 
-            error?.let {
-                showToast("ERROR: ${it.message}")
-            }
         }
     }
 
@@ -141,14 +129,12 @@ class TunerFragment : Fragment() {
             if (vMakeNoise.visibility == View.VISIBLE) {
                 vDeviationBars.animateBars()
             }
-            viewModel.startListening()
         } else {
             vGivePermission.visibility = View.VISIBLE
         }
     }
 
     private fun stopListening() {
-        viewModel.stopListening()
     }
 
     private fun showExternalAppSettings() {

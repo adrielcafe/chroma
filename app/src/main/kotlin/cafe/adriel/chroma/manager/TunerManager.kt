@@ -4,6 +4,10 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.AudioEvent
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
@@ -11,40 +15,71 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.model.Settings
-import cafe.adriel.chroma.model.Tuning
+import cafe.adriel.chroma.model.*
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlin.math.absoluteValue
 import kotlin.math.log2
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TunerManager : PitchDetectionHandler {
+class TunerManager(
+    private val settingsManager: SettingsManager,
+    private val permissionManager: PermissionManager,
+    private val lifecycleOwner: LifecycleOwner
+) : LifecycleEventObserver, PitchDetectionHandler {
 
-    companion object {
-        private const val SAMPLE_RATE = 22050
-        private const val SAMPLE_RATE_BITS = 16
-        private const val CHANNEL_COUNT = 1
-        private const val OVERLAP = 0
-        private const val BUFFER_SIZE = 2048
+    private companion object {
+        const val SAMPLE_RATE = 22050
+        const val SAMPLE_RATE_BITS = 16
+        const val CHANNEL_COUNT = 1
+        const val OVERLAP = 0
+        const val BUFFER_SIZE = 2048
     }
+
+    private val _state by lazy { MutableStateFlow(Tuning()) }
+    val state by lazy { _state.asStateFlow() }
 
     private var audioDispatcher: AudioDispatcher? = null
     private var pitchProcessor: PitchProcessor? = null
     private var noiseSuppressor: NoiseSuppressor? = null
 
-    var listener: TunerListener? = null
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
 
     override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
         val pitch = result?.pitch ?: -1F
         if (pitch >= 0) {
-            listener?.onTuningDetected(getTuning(pitch))
+            _state.value = getTuning(pitch)
         }
     }
 
-    suspend fun startListening(settings: Settings) = withContext(Dispatchers.IO) {
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        lifecycleOwner.lifecycleScope.launch {
+            when (event) {
+                Lifecycle.Event.ON_START -> startListener(settingsManager.settings)
+                Lifecycle.Event.ON_STOP -> stopListener()
+            }
+        }
+    }
+
+    fun restartListener() {
+        lifecycleOwner.lifecycleScope.launch {
+            stopListener()
+            startListener(settingsManager.settings)
+        }
+    }
+
+    private suspend fun startListener(settings: Settings) = withContext(Dispatchers.IO) {
         try {
+            if (permissionManager.hasRequiredPermissions.not()) {
+                return@withContext
+            }
+
             val bufferSize = getBufferSize()
             val audioRecord = getAudioRecord(bufferSize).apply {
                 startRecording()
@@ -65,11 +100,11 @@ class TunerManager : PitchDetectionHandler {
                 run()
             }
         } catch (e: Exception) {
-            listener?.onError(e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
-    suspend fun stopListening() = withContext(Dispatchers.IO) {
+    private suspend fun stopListener() = withContext(Dispatchers.IO) {
         try {
             stopNoiseSuppressor()
 
@@ -82,7 +117,7 @@ class TunerManager : PitchDetectionHandler {
             pitchProcessor = null
             audioDispatcher = null
         } catch (e: Exception) {
-            listener?.onError(e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -100,7 +135,7 @@ class TunerManager : PitchDetectionHandler {
     }
 
     private fun getTuning(detectedFrequency: Float): Tuning {
-        var minDeviation = Float.POSITIVE_INFINITY
+        var minDeviation = Int.MAX_VALUE
         var closestNote = ChromaticScale.notes.first()
 
         ChromaticScale.notes.forEach { note ->
@@ -111,11 +146,19 @@ class TunerManager : PitchDetectionHandler {
             }
         }
 
-        return Tuning(closestNote, detectedFrequency, minDeviation.roundToInt())
+        val deviationResult = TuningDeviationResult.Detected(
+            value = minDeviation,
+            precision = TuningDeviationPrecision.fromDeviation(
+                deviation = minDeviation,
+                offset = settingsManager.tunerDeviationPrecisionOffset
+            )
+        )
+
+        return Tuning(closestNote, detectedFrequency, deviationResult)
     }
 
     private fun getTuningDeviation(standardFrequency: Float, detectedFrequency: Float) =
-        1200 * log2(detectedFrequency / standardFrequency)
+        (1200 * log2(detectedFrequency / standardFrequency)).roundToInt()
 
     private fun getAudioDispatcher(audioRecord: AudioRecord, bufferSize: Int): AudioDispatcher {
         val format = TarsosDSPAudioFormat(SAMPLE_RATE.toFloat(), SAMPLE_RATE_BITS, CHANNEL_COUNT, true, false)
@@ -142,12 +185,5 @@ class TunerManager : PitchDetectionHandler {
         val minAudioBufferSizeInSamples = minBufferSize / 2
 
         return if (minAudioBufferSizeInSamples > BUFFER_SIZE) minAudioBufferSizeInSamples else BUFFER_SIZE
-    }
-
-    interface TunerListener {
-
-        fun onTuningDetected(tuning: Tuning)
-
-        fun onError(error: Exception)
     }
 }

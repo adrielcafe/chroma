@@ -23,10 +23,8 @@
     <string name="pitch_detection_algorithm">Pitch Detection Algorithm</string>
     <string name="sharp">Sharp (♯)</string>
     <string name="flat">Flat (♭)</string>
-    <string name="make_noise">Make\nSome\n<font fgcolor='#1abc9c'>Noise!</font></string>
-    <string name="give_permission">Give permission</string>
-    <string name="request_again">Request again</string>
-    <string name="permission_needed">Permission needed to continue</string>
+    <string name="give_permission">Allow</string>
+    <string name="permission_needed">Permission required</string>
     <string name="hi_there_are_you_enjoying_the_app">Hi there! Are you enjoying the app? I hope so 😊\n\nIf you have any question, suggestion or want to contribute (new content, found a bug, translation…) please contact me using the links below.</string>
     <string name="this_app_is_open_source">This app is open source, contributions are very welcome!</string>
     <string name="about">About</string>
