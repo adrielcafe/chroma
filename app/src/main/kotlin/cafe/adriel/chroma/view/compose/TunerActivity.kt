@@ -2,15 +2,11 @@ package cafe.adriel.chroma.view.compose
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import cafe.adriel.chroma.model.TuningDeviationPrecision
-import org.koin.androidx.scope.activityScope
+import org.koin.androidx.scope.ScopeActivity
 
-class TunerActivity : AppCompatActivity() {
+class TunerActivity : ScopeActivity() {
 
-    private val screen by activityScope().inject<TunerScreen>()
+    private val screen by inject<TunerScreen>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

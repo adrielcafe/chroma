@@ -7,12 +7,10 @@ import cafe.adriel.chroma.R
 
 object ChromaTypography {
 
-    val pacificoFontFamily = FontFamily(Font(R.font.pacifico))
-    val notoSansFontFamily = FontFamily(Font(R.font.noto_sans))
+    private val notoSansFontFamily = FontFamily(Font(R.font.noto_sans))
 
     operator fun invoke() =
         Typography(
             defaultFontFamily = notoSansFontFamily
         )
 }
-

@@ -1,7 +1,6 @@
 package cafe.adriel.chroma.manager
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -9,14 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import cafe.adriel.chroma.util.hasPermission
 import com.markodevcic.peko.Peko
-import com.markodevcic.peko.PermissionResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class PermissionManager(
     private val activity: AppCompatActivity
@@ -38,7 +33,7 @@ class PermissionManager(
         }
     }
 
-    suspend fun requestPermission() {
+    suspend fun requestPermissions() {
         runCatching {
             Peko.requestPermissionsAsync(activity, Manifest.permission.RECORD_AUDIO)
             updateState()

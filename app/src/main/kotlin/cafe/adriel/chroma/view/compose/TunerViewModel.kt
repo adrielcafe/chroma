@@ -9,7 +9,11 @@ import cafe.adriel.chroma.model.Tuning
 import cafe.adriel.chroma.model.TuningDeviationPrecision
 import cafe.adriel.chroma.model.TuningDeviationResult
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class TunerViewModel(
@@ -58,35 +62,22 @@ class TunerViewModel(
 
     private suspend fun requestPermissions() {
         if (permissionManager.hasRequiredPermissions.not()) {
-            permissionManager.requestPermission()
+            permissionManager.requestPermissions()
         }
     }
 
     private suspend fun playStartAnimation() {
-        val updateAnimation: suspend (Int) -> Unit = { deviation ->
-            _state.value = _state.value.copy(
-                tuning = Tuning(
-                    deviationResult = TuningDeviationResult.Animation(
-                        negativeValue = -deviation,
-                        negativePrecision = TuningDeviationPrecision.fromDeviation(
-                            deviation = -deviation,
-                            offset = settingsManager.tunerDeviationPrecisionOffset
-                        ),
-                        positiveValue = deviation,
-                        positivePrecision = TuningDeviationPrecision.fromDeviation(
-                            deviation = deviation,
-                            offset = settingsManager.tunerDeviationPrecisionOffset
-                        )
-                    )
-                )
-            )
+        delay(500)
+
+        (50 downTo 0 step 10).forEach { deviation ->
+            updateAnimation(deviation)
             delay(150)
         }
 
-        delay(500)
-
-        (50 downTo 0 step 10).forEach { updateAnimation(it) }
-        (0..50 step 10).forEach { updateAnimation(it) }
+        (0..50 step 10).forEach { deviation ->
+            updateAnimation(deviation)
+            delay(150)
+        }
 
         _state.value = _state.value.copy(
             tuning = Tuning(
@@ -95,6 +86,25 @@ class TunerViewModel(
         )
 
         delay(500)
+    }
+
+    private fun updateAnimation(deviation: Int) {
+        _state.value = _state.value.copy(
+            tuning = Tuning(
+                deviationResult = TuningDeviationResult.Animation(
+                    negativeValue = -deviation,
+                    negativePrecision = TuningDeviationPrecision.fromDeviation(
+                        deviation = -deviation,
+                        offset = settingsManager.tunerDeviationPrecisionOffset
+                    ),
+                    positiveValue = deviation,
+                    positivePrecision = TuningDeviationPrecision.fromDeviation(
+                        deviation = deviation,
+                        offset = settingsManager.tunerDeviationPrecisionOffset
+                    )
+                )
+            )
+        )
     }
 
     private fun <T> Flow<T>.mergeState(action: (TunerState, T) -> TunerState): Flow<T> =

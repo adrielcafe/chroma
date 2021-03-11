@@ -15,7 +15,6 @@
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline3"
         android:textColor="@android:color/white"
-        app:fontFamily="@font/pacifico"
         app:layout_constraintBottom_toTopOf="@+id/vDeviationBars"
         app:layout_constraintTop_toTopOf="parent"
         app:lineHeight="60dp"

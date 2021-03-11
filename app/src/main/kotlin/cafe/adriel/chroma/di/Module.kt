@@ -13,10 +13,10 @@ import cafe.adriel.chroma.view.compose.TunerViewModel
 import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
 import com.github.stephenvinouze.core.managers.KinAppManager
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
-import java.io.File
 
 val appModule = module {
 

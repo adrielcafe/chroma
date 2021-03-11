@@ -64,12 +64,10 @@ class TunerFragment : Fragment() {
         lifecycleScope.launch {
             requestPermission()
         }
-
     }
 
     private fun onStateChanged(state: TunerState) {
         state.apply {
-
         }
     }
 

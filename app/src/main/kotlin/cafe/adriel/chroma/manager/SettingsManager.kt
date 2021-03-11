@@ -1,6 +1,6 @@
 package cafe.adriel.chroma.manager
 
-import be.tarsos.dsp.pitch.PitchProcessor.*
+import be.tarsos.dsp.pitch.PitchProcessor
 import cafe.adriel.chroma.model.Settings
 import cafe.adriel.satchel.SatchelStorage
 import cafe.adriel.satchel.ktx.value
@@ -21,7 +21,7 @@ class SettingsManager(
     var tunerSolfegeNotation by storage.value("tuner_solfege_notation", false)
     var tunerFlatSymbol by storage.value("tuner_flat_symbol", false)
     var tunerDeviationPrecisionOffset by storage.value("tuner_deviation_precision_offset", 3)
-    var tunerPitchAlgorithm by storage.value("tuner_pitch_algorithm", PitchEstimationAlgorithm.FFT_YIN)
+    var tunerPitchAlgorithm by storage.value("tuner_pitch_algorithm", PitchProcessor.PitchEstimationAlgorithm.FFT_YIN)
 
     val settings: Settings
         get() = Settings(
