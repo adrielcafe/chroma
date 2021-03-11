@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.view.compose.components
+package cafe.adriel.chroma.view.components
 
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState

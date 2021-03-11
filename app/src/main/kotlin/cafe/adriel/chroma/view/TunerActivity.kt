@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.view.compose
+package cafe.adriel.chroma.view
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

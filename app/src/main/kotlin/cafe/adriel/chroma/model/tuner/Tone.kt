@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.model
+package cafe.adriel.chroma.model.tuner
 
 object Tone {
 

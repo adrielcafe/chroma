@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.model
+package cafe.adriel.chroma.model.tuner
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

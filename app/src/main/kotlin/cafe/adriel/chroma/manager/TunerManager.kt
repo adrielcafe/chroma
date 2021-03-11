@@ -15,11 +15,11 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.model.Settings
-import cafe.adriel.chroma.model.Tuning
-import cafe.adriel.chroma.model.TuningDeviationPrecision
-import cafe.adriel.chroma.model.TuningDeviationResult
+import cafe.adriel.chroma.model.settings.Settings
+import cafe.adriel.chroma.model.tuner.ChromaticScale
+import cafe.adriel.chroma.model.tuner.Tuning
+import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
+import cafe.adriel.chroma.model.tuner.TuningDeviationResult
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlin.math.absoluteValue
 import kotlin.math.log2

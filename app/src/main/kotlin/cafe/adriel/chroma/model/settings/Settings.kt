@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.model
+package cafe.adriel.chroma.model.settings
 
 import android.os.Parcelable
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm

@@ -7,9 +7,9 @@ import cafe.adriel.chroma.manager.BillingManager
 import cafe.adriel.chroma.manager.PermissionManager
 import cafe.adriel.chroma.manager.SettingsManager
 import cafe.adriel.chroma.manager.TunerManager
-import cafe.adriel.chroma.view.compose.TunerActivity
-import cafe.adriel.chroma.view.compose.TunerScreen
-import cafe.adriel.chroma.view.compose.TunerViewModel
+import cafe.adriel.chroma.view.TunerActivity
+import cafe.adriel.chroma.view.TunerScreen
+import cafe.adriel.chroma.view.TunerViewModel
 import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
 import com.github.stephenvinouze.core.managers.KinAppManager

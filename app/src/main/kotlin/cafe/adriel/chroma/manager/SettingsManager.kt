@@ -1,7 +1,7 @@
 package cafe.adriel.chroma.manager
 
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.model.Settings
+import cafe.adriel.chroma.model.settings.Settings
 import cafe.adriel.satchel.SatchelStorage
 import cafe.adriel.satchel.ktx.value
 import kotlinx.coroutines.CoroutineScope

@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.view.compose.theme
+package cafe.adriel.chroma.view.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.font.Font

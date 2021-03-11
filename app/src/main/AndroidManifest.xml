@@ -16,7 +16,7 @@
         android:allowBackup="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".view.compose.TunerActivity"
+            android:name=".view.TunerActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.view.compose.components
+package cafe.adriel.chroma.view.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.model.TuningDeviationPrecision
-import cafe.adriel.chroma.model.TuningDeviationResult
-import cafe.adriel.chroma.model.TuningUnit
+import cafe.adriel.chroma.model.tuner.ChromaticScale
+import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
+import cafe.adriel.chroma.model.tuner.TuningDeviationResult
+import cafe.adriel.chroma.model.tuner.TuningUnit
 
 @Composable
 fun TuningNote(

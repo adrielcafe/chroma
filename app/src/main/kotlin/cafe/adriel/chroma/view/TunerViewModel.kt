@@ -1,13 +1,13 @@
-package cafe.adriel.chroma.view.compose
+package cafe.adriel.chroma.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cafe.adriel.chroma.manager.PermissionManager
 import cafe.adriel.chroma.manager.SettingsManager
 import cafe.adriel.chroma.manager.TunerManager
-import cafe.adriel.chroma.model.Tuning
-import cafe.adriel.chroma.model.TuningDeviationPrecision
-import cafe.adriel.chroma.model.TuningDeviationResult
+import cafe.adriel.chroma.model.tuner.Tuning
+import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
+import cafe.adriel.chroma.model.tuner.TuningDeviationResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.view.compose
+package cafe.adriel.chroma.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,14 +28,14 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import cafe.adriel.chroma.R
 import cafe.adriel.chroma.manager.PermissionManager
-import cafe.adriel.chroma.model.Settings
-import cafe.adriel.chroma.model.Tuning
-import cafe.adriel.chroma.model.TuningDeviationResult
-import cafe.adriel.chroma.view.compose.components.RequestPermissionSnackbar
-import cafe.adriel.chroma.view.compose.components.TuningDeviationBars
-import cafe.adriel.chroma.view.compose.components.TuningInfo
-import cafe.adriel.chroma.view.compose.components.TuningNote
-import cafe.adriel.chroma.view.compose.theme.ChromaTheme
+import cafe.adriel.chroma.model.settings.Settings
+import cafe.adriel.chroma.model.tuner.Tuning
+import cafe.adriel.chroma.model.tuner.TuningDeviationResult
+import cafe.adriel.chroma.view.components.RequestPermissionSnackbar
+import cafe.adriel.chroma.view.components.TuningDeviationBars
+import cafe.adriel.chroma.view.components.TuningInfo
+import cafe.adriel.chroma.view.components.TuningNote
+import cafe.adriel.chroma.view.theme.ChromaTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
