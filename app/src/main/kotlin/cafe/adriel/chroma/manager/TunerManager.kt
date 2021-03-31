@@ -94,7 +94,7 @@ class TunerManager(
             }
 
             pitchProcessor = PitchProcessor(
-                settings.pitchAlgorithm,
+                settings.pitchDetectionAlgorithm.algorithm,
                 SAMPLE_RATE.toFloat(),
                 bufferSize,
                 this@TunerManager
@@ -103,7 +103,7 @@ class TunerManager(
                 addAudioProcessor(pitchProcessor)
                 run()
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
@@ -120,7 +120,7 @@ class TunerManager(
             noiseSuppressor = null
             pitchProcessor = null
             audioDispatcher = null
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
@@ -154,7 +154,7 @@ class TunerManager(
             value = minDeviation,
             precision = TuningDeviationPrecision.fromDeviation(
                 deviation = minDeviation,
-                offset = settingsManager.tunerDeviationPrecisionOffset
+                offset = settingsManager.tunerDeviationPrecision.offset
             )
         )
 

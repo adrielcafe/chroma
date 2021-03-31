@@ -1,15 +1,11 @@
 package cafe.adriel.chroma.model.tuner
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
-@Parcelize
 enum class ChromaticScale(
     val tone: String,
     val octave: Int,
     val frequency: Float,
     val semitone: Boolean = false
-) : Parcelable {
+) {
 
     C0(Tone.C, 0, 16.35f),
     C0_SHARP(Tone.C, 0, 17.32f, true),

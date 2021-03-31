@@ -1,15 +1,15 @@
 package cafe.adriel.chroma.model.settings
 
-import android.os.Parcelable
-import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm
-import kotlinx.android.parcel.Parcelize
+import cafe.adriel.chroma.model.settings.options.AccidentalOption
+import cafe.adriel.chroma.model.settings.options.DeviationPrecisionOption
+import cafe.adriel.chroma.model.settings.options.NotationOption
+import cafe.adriel.chroma.model.settings.options.PitchDetectionAlgorithmOption
 
-@Parcelize
 data class Settings(
-    val basicMode: Boolean,
+    val advancedMode: Boolean,
     val noiseSuppressor: Boolean,
-    val solfegeNotation: Boolean,
-    val flatSymbol: Boolean,
-    val deviationPrecisionOffset: Int,
-    val pitchAlgorithm: PitchEstimationAlgorithm
-) : Parcelable
+    val notation: NotationOption,
+    val accidental: AccidentalOption,
+    val pitchDetectionAlgorithm: PitchDetectionAlgorithmOption,
+    val deviationPrecision: DeviationPrecisionOption
+)

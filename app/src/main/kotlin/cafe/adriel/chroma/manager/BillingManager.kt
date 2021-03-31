@@ -1,37 +1,35 @@
 package cafe.adriel.chroma.manager
 
-import android.app.Activity
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import cafe.adriel.chroma.BuildConfig
+import cafe.adriel.chroma.R
+import cafe.adriel.chroma.model.settings.DonationProduct
 import com.github.stephenvinouze.core.managers.KinAppManager
 import com.github.stephenvinouze.core.models.KinAppProductType
 import com.github.stephenvinouze.core.models.KinAppPurchase
 import com.github.stephenvinouze.core.models.KinAppPurchaseResult
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class BillingManager(
+    private val activity: AppCompatActivity,
+    private val messagingManager: MessagingManager,
     private val kin: KinAppManager,
     private val scope: CoroutineScope
 ) : LifecycleEventObserver, KinAppManager.KinAppListener {
 
-    sealed class Event {
-        data class BillingSupported(val supported: Boolean) : Event()
-        data class PurchaseCompleted(val success: Boolean) : Event()
-    }
+    private val _state by lazy { MutableStateFlow(false) }
+    val state by lazy { _state.asStateFlow() }
 
-    private val eventFlow by lazy { MutableSharedFlow<Event>() }
-
-    fun observe(owner: LifecycleOwner): Flow<Event> {
-        owner.lifecycle.addObserver(this)
-        return eventFlow.asSharedFlow()
+    init {
+        activity.lifecycle.addObserver(this)
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -43,7 +41,7 @@ class BillingManager(
 
     override fun onBillingReady() {
         scope.launch {
-            val supported = try {
+            _state.value = try {
                 kin.restorePurchases(KinAppProductType.INAPP)?.forEach {
                     kin.consumePurchase(it)
                 }
@@ -52,8 +50,6 @@ class BillingManager(
                 FirebaseCrashlytics.getInstance().recordException(e)
                 false
             }
-
-            eventFlow.emit(Event.BillingSupported(supported))
         }
     }
 
@@ -65,11 +61,13 @@ class BillingManager(
                 false
             }
 
-            eventFlow.emit(Event.PurchaseCompleted(success))
+            if (success) {
+                messagingManager.send(R.string.thanks_for_support)
+            }
         }
     }
 
-    fun verifyDonation(requestCode: Int, resultCode: Int, data: Intent?) =
+    fun verifyPurchase(requestCode: Int, resultCode: Int, data: Intent?) =
         try {
             kin.verifyPurchase(requestCode, resultCode, data)
         } catch (e: Exception) {
@@ -77,11 +75,9 @@ class BillingManager(
             false
         }
 
-    fun donate(activity: Activity, sku: String) {
+    fun donate(product: DonationProduct) {
         if (BuildConfig.RELEASE) {
-            if (sku.isNotBlank()) {
-                kin.purchase(activity, sku, KinAppProductType.INAPP)
-            }
+            kin.purchase(activity, product.sku, KinAppProductType.INAPP)
         } else {
             kin.purchase(activity, KinAppManager.TEST_PURCHASE_SUCCESS, KinAppProductType.INAPP)
         }

@@ -1,16 +1,14 @@
 package cafe.adriel.chroma.model.tuner
 
-import android.os.Parcelable
-import cafe.adriel.chroma.R
 import cafe.adriel.chroma.model.settings.Settings
-import kotlinx.android.parcel.Parcelize
+import cafe.adriel.chroma.model.settings.options.AccidentalOption
+import cafe.adriel.chroma.model.settings.options.NotationOption
 
-@Parcelize
 data class Tuning(
     val note: ChromaticScale? = null,
     val frequency: Float = -1f,
     val deviationResult: TuningDeviationResult = TuningDeviationResult.NotDetected
-) : Parcelable {
+) {
 
     val formattedFrequency by lazy { ChromaticScale.FREQUENCY_FORMAT.format(frequency) }
 
@@ -18,12 +16,15 @@ data class Tuning(
         requireNotNull(note)
 
         return when {
-            settings.flatSymbol && settings.solfegeNotation && note.semitone ->
-                ChromaticScale.getSolfegeTone(ChromaticScale.getFlatTone(note.tone))
-            settings.flatSymbol && note.semitone ->
-                ChromaticScale.getFlatTone(note.tone)
-            settings.solfegeNotation ->
-                ChromaticScale.getSolfegeTone(note.tone)
+            settings.accidental == AccidentalOption.FLAT &&
+                settings.notation == NotationOption.DO_RE_MI
+                && note.semitone -> ChromaticScale.getSolfegeTone(ChromaticScale.getFlatTone(note.tone))
+
+            settings.accidental == AccidentalOption.FLAT
+                && note.semitone -> ChromaticScale.getFlatTone(note.tone)
+
+            settings.notation == NotationOption.DO_RE_MI -> ChromaticScale.getSolfegeTone(note.tone)
+
             else -> note.tone
         }
     }
@@ -32,8 +33,7 @@ data class Tuning(
         requireNotNull(note)
 
         return if (note.semitone) {
-            if (settings.flatSymbol) R.string.flat_symbol
-            else R.string.sharp_symbol
+            settings.accidental.symbolRes
         } else {
             null
         }

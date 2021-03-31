@@ -4,12 +4,13 @@ import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.chroma.manager.BillingManager
+import cafe.adriel.chroma.manager.MessagingManager
 import cafe.adriel.chroma.manager.PermissionManager
 import cafe.adriel.chroma.manager.SettingsManager
 import cafe.adriel.chroma.manager.TunerManager
-import cafe.adriel.chroma.view.TunerActivity
-import cafe.adriel.chroma.view.TunerScreen
-import cafe.adriel.chroma.view.TunerViewModel
+import cafe.adriel.chroma.view.tuner.TunerActivity
+import cafe.adriel.chroma.view.tuner.TunerScreen
+import cafe.adriel.chroma.view.tuner.TunerViewModel
 import cafe.adriel.satchel.Satchel
 import cafe.adriel.satchel.storer.file.FileSatchelStorer
 import com.github.stephenvinouze.core.managers.KinAppManager
@@ -25,19 +26,22 @@ val appModule = module {
             TunerViewModel(
                 tunerManager = get(),
                 settingsManager = get(),
-                permissionManager = get()
+                permissionManager = get(),
+                billingManager = get(),
+                messagingManager = get()
             )
         }
 
         scoped {
             TunerScreen(
-                viewModel = get(),
-                permissionManager = get()
+                viewModel = get()
             )
         }
 
         scoped {
             BillingManager(
+                activity = getSource<TunerActivity>(),
+                messagingManager = get(),
                 kin = get(),
                 scope = getSource<TunerActivity>().lifecycleScope
             )
@@ -56,6 +60,12 @@ val appModule = module {
                 activity = getSource<TunerActivity>()
             )
         }
+
+        scoped {
+            MessagingManager(
+                context = getSource<TunerActivity>()
+            )
+        }
     }
 
     single {
@@ -66,9 +76,10 @@ val appModule = module {
     }
 
     single {
-        val file = File(get<Application>().filesDir, "settings.storage")
         Satchel.with(
-            storer = FileSatchelStorer(file)
+            storer = FileSatchelStorer(
+                file = File(get<Application>().filesDir, "settings.storage")
+            )
         )
     }
 

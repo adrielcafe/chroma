@@ -1,7 +1,10 @@
 package cafe.adriel.chroma.manager
 
-import be.tarsos.dsp.pitch.PitchProcessor
 import cafe.adriel.chroma.model.settings.Settings
+import cafe.adriel.chroma.model.settings.options.AccidentalOption
+import cafe.adriel.chroma.model.settings.options.DeviationPrecisionOption
+import cafe.adriel.chroma.model.settings.options.NotationOption
+import cafe.adriel.chroma.model.settings.options.PitchDetectionAlgorithmOption
 import cafe.adriel.satchel.SatchelStorage
 import cafe.adriel.satchel.ktx.value
 import kotlinx.coroutines.CoroutineScope
@@ -16,22 +19,48 @@ class SettingsManager(
     private val _state by lazy { MutableStateFlow(settings) }
     val state by lazy { _state.asStateFlow() }
 
-    var tunerBasicMode by storage.value("tuner_basic_mode", false)
-    var tunerNoiseSuppressor by storage.value("tuner_noise_suppressor", false)
-    var tunerSolfegeNotation by storage.value("tuner_solfege_notation", false)
-    var tunerFlatSymbol by storage.value("tuner_flat_symbol", false)
-    var tunerDeviationPrecisionOffset by storage.value("tuner_deviation_precision_offset", 3)
-    var tunerPitchAlgorithm by storage.value("tuner_pitch_algorithm", PitchProcessor.PitchEstimationAlgorithm.FFT_YIN)
+    var tunerAdvancedMode by storage.value(
+        key = "tuner_advanced_mode",
+        defaultValue = true
+    )
+    var tunerNoiseSuppressor by storage.value(
+        key = "tuner_noise_suppressor",
+        defaultValue = false
+    )
+    var tunerNotation by storage.value(
+        key = "tuner_notation",
+        defaultValue = NotationOption.A_B_C
+    )
+    var tunerAccidental by storage.value(
+        key = "tuner_accidental",
+        defaultValue = AccidentalOption.SHARP
+    )
+    var tunerPitchDetectionAlgorithm by storage.value(
+        key = "tuner_pitch_detection_algorithm",
+        defaultValue = PitchDetectionAlgorithmOption.FFT_YIN
+    )
+    var tunerDeviationPrecision by storage.value(
+        key = "tuner_deviation_precision",
+        defaultValue = DeviationPrecisionOption.Two
+    )
 
-    val settings: Settings
+    var settings: Settings
         get() = Settings(
-            basicMode = tunerBasicMode,
+            advancedMode = tunerAdvancedMode,
             noiseSuppressor = tunerNoiseSuppressor,
-            solfegeNotation = tunerSolfegeNotation,
-            flatSymbol = tunerFlatSymbol,
-            deviationPrecisionOffset = tunerDeviationPrecisionOffset,
-            pitchAlgorithm = tunerPitchAlgorithm
+            notation = tunerNotation,
+            accidental = tunerAccidental,
+            deviationPrecision = tunerDeviationPrecision,
+            pitchDetectionAlgorithm = tunerPitchDetectionAlgorithm
         )
+        set(value) {
+            tunerAdvancedMode = value.advancedMode
+            tunerNoiseSuppressor = value.noiseSuppressor
+            tunerNotation = value.notation
+            tunerAccidental = value.accidental
+            tunerDeviationPrecision = value.deviationPrecision
+            tunerPitchDetectionAlgorithm = value.pitchDetectionAlgorithm
+        }
 
     init {
         storage.addListener(scope) {
