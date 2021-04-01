@@ -4,6 +4,10 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.AudioEvent
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
@@ -11,85 +15,119 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
-import cafe.adriel.chroma.model.ChromaticScale
-import cafe.adriel.chroma.model.Settings
-import cafe.adriel.chroma.model.Tuning
+import cafe.adriel.chroma.ktx.logError
+import cafe.adriel.chroma.model.settings.Settings
+import cafe.adriel.chroma.model.tuner.ChromaticScale
+import cafe.adriel.chroma.model.tuner.Tuning
+import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
+import cafe.adriel.chroma.model.tuner.TuningDeviationResult
 import kotlin.math.absoluteValue
 import kotlin.math.log2
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TunerManager : PitchDetectionHandler {
+class TunerManager(
+    private val settingsManager: SettingsManager,
+    private val permissionManager: PermissionManager,
+    private val lifecycleOwner: LifecycleOwner
+) : LifecycleEventObserver, PitchDetectionHandler {
 
-    companion object {
-        private const val SAMPLE_RATE = 22050
-        private const val SAMPLE_RATE_BITS = 16
-        private const val CHANNEL_COUNT = 1
-        private const val OVERLAP = 0
-        private const val BUFFER_SIZE = 2048
+    private companion object {
+        const val SAMPLE_RATE = 22050
+        const val SAMPLE_RATE_BITS = 16
+        const val CHANNEL_COUNT = 1
+        const val OVERLAP = 0
+        const val BUFFER_SIZE = 2048
     }
+
+    private val _state by lazy { MutableStateFlow(Tuning()) }
+    val state by lazy { _state.asStateFlow() }
 
     private var audioDispatcher: AudioDispatcher? = null
     private var pitchProcessor: PitchProcessor? = null
     private var noiseSuppressor: NoiseSuppressor? = null
 
-    var listener: TunerListener? = null
+    init {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
 
     override fun handlePitch(result: PitchDetectionResult?, event: AudioEvent?) {
         val pitch = result?.pitch ?: -1F
         if (pitch >= 0) {
-            listener?.onTuningDetected(getTuning(pitch))
+            _state.value = getTuning(pitch)
         }
     }
 
-    suspend fun startListening(settings: Settings) = withContext(Dispatchers.IO) {
-        try {
-            val bufferSize = getBufferSize()
-            val audioRecord = getAudioRecord(bufferSize).apply {
-                startRecording()
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        lifecycleOwner.lifecycleScope.launch {
+            when (event) {
+                Lifecycle.Event.ON_START -> startListener(settingsManager.settings)
+                Lifecycle.Event.ON_STOP -> stopListener()
             }
-
-            if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
-                startNoiseSuppressor(audioRecord.audioSessionId)
-            }
-
-            pitchProcessor = PitchProcessor(
-                settings.pitchAlgorithm,
-                SAMPLE_RATE.toFloat(),
-                bufferSize,
-                this@TunerManager
-            )
-            audioDispatcher = getAudioDispatcher(audioRecord, bufferSize).apply {
-                addAudioProcessor(pitchProcessor)
-                run()
-            }
-        } catch (e: Exception) {
-            listener?.onError(e)
         }
     }
 
-    suspend fun stopListening() = withContext(Dispatchers.IO) {
-        try {
-            stopNoiseSuppressor()
+    fun restartListener() {
+        lifecycleOwner.lifecycleScope.launch {
+            stopListener()
+            startListener(settingsManager.settings)
+        }
+    }
 
-            audioDispatcher?.apply {
-                removeAudioProcessor(pitchProcessor)
-                stop()
-            }
+    private suspend fun startListener(settings: Settings) {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                if (permissionManager.hasRequiredPermissions.not()) {
+                    return@withContext
+                }
 
-            noiseSuppressor = null
-            pitchProcessor = null
-            audioDispatcher = null
-        } catch (e: Exception) {
-            listener?.onError(e)
+                val bufferSize = getBufferSize()
+                val audioRecord = getAudioRecord(bufferSize).apply {
+                    startRecording()
+                }
+
+                if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
+                    startNoiseSuppressor(audioRecord.audioSessionId)
+                }
+
+                pitchProcessor = PitchProcessor(
+                    settings.pitchDetectionAlgorithm.algorithm,
+                    SAMPLE_RATE.toFloat(),
+                    bufferSize,
+                    this@TunerManager
+                )
+                audioDispatcher = getAudioDispatcher(audioRecord, bufferSize).apply {
+                    addAudioProcessor(pitchProcessor)
+                    run()
+                }
+            }.onFailure(::logError)
+        }
+    }
+
+    private suspend fun stopListener() {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                stopNoiseSuppressor()
+
+                audioDispatcher?.apply {
+                    removeAudioProcessor(pitchProcessor)
+                    stop()
+                }
+
+                noiseSuppressor = null
+                pitchProcessor = null
+                audioDispatcher = null
+            }.onFailure(::logError)
         }
     }
 
     private fun startNoiseSuppressor(audioSessionId: Int) {
-        noiseSuppressor = NoiseSuppressor.create(audioSessionId).apply {
-            enabled = true
-        }
+        noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+            .apply { enabled = true }
     }
 
     private fun stopNoiseSuppressor() {
@@ -100,7 +138,7 @@ class TunerManager : PitchDetectionHandler {
     }
 
     private fun getTuning(detectedFrequency: Float): Tuning {
-        var minDeviation = Float.POSITIVE_INFINITY
+        var minDeviation = Int.MAX_VALUE
         var closestNote = ChromaticScale.notes.first()
 
         ChromaticScale.notes.forEach { note ->
@@ -111,11 +149,19 @@ class TunerManager : PitchDetectionHandler {
             }
         }
 
-        return Tuning(closestNote, detectedFrequency, minDeviation.roundToInt())
+        val deviationResult = TuningDeviationResult.Detected(
+            value = minDeviation,
+            precision = TuningDeviationPrecision.fromDeviation(
+                deviation = minDeviation,
+                offset = settingsManager.tunerDeviationPrecision.offset
+            )
+        )
+
+        return Tuning(closestNote, detectedFrequency, deviationResult)
     }
 
     private fun getTuningDeviation(standardFrequency: Float, detectedFrequency: Float) =
-        1200 * log2(detectedFrequency / standardFrequency)
+        (1200 * log2(detectedFrequency / standardFrequency)).roundToInt()
 
     private fun getAudioDispatcher(audioRecord: AudioRecord, bufferSize: Int): AudioDispatcher {
         val format = TarsosDSPAudioFormat(SAMPLE_RATE.toFloat(), SAMPLE_RATE_BITS, CHANNEL_COUNT, true, false)
@@ -142,12 +188,5 @@ class TunerManager : PitchDetectionHandler {
         val minAudioBufferSizeInSamples = minBufferSize / 2
 
         return if (minAudioBufferSizeInSamples > BUFFER_SIZE) minAudioBufferSizeInSamples else BUFFER_SIZE
-    }
-
-    interface TunerListener {
-
-        fun onTuningDetected(tuning: Tuning)
-
-        fun onError(error: Exception)
     }
 }

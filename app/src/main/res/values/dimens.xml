@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="deviation_bar_width">3dp</dimen>
-    <dimen name="deviation_bar_height_green">100dp</dimen>
-    <dimen name="deviation_bar_height_yellow">60dp</dimen>
-    <dimen name="deviation_bar_height_red">30dp</dimen>
-</resources>
