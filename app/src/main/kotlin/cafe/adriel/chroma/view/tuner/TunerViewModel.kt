@@ -7,7 +7,7 @@ import cafe.adriel.chroma.manager.MessagingManager
 import cafe.adriel.chroma.manager.PermissionManager
 import cafe.adriel.chroma.manager.SettingsManager
 import cafe.adriel.chroma.manager.TunerManager
-import cafe.adriel.chroma.model.settings.DonationProduct
+import cafe.adriel.chroma.model.DonationProduct
 import cafe.adriel.chroma.model.settings.Settings
 import cafe.adriel.chroma.model.tuner.Tuning
 import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
@@ -30,7 +30,7 @@ class TunerViewModel(
 
     private val _state by lazy {
         MutableStateFlow(
-            value = TunerState(
+            TunerState(
                 settings = settingsManager.settings,
                 hasRequiredPermissions = permissionManager.hasRequiredPermissions
             )
@@ -113,7 +113,7 @@ class TunerViewModel(
 
         _state.value = _state.value.copy(
             tuning = Tuning(
-                deviationResult = TuningDeviationResult.NotDetected
+                deviation = TuningDeviationResult.NotDetected
             )
         )
 
@@ -123,7 +123,7 @@ class TunerViewModel(
     private fun updateAnimation(deviation: Int) {
         _state.value = _state.value.copy(
             tuning = Tuning(
-                deviationResult = TuningDeviationResult.Animation(
+                deviation = TuningDeviationResult.Animation(
                     negativeValue = -deviation,
                     negativePrecision = TuningDeviationPrecision.fromDeviation(
                         deviation = -deviation,

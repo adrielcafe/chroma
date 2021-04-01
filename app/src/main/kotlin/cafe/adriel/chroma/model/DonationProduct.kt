@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.model.settings
+package cafe.adriel.chroma.model
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.Dp

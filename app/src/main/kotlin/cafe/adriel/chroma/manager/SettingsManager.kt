@@ -1,10 +1,10 @@
 package cafe.adriel.chroma.manager
 
+import cafe.adriel.chroma.model.settings.AccidentalOption
+import cafe.adriel.chroma.model.settings.DeviationPrecisionOption
+import cafe.adriel.chroma.model.settings.NotationOption
+import cafe.adriel.chroma.model.settings.PitchDetectionAlgorithmOption
 import cafe.adriel.chroma.model.settings.Settings
-import cafe.adriel.chroma.model.settings.options.AccidentalOption
-import cafe.adriel.chroma.model.settings.options.DeviationPrecisionOption
-import cafe.adriel.chroma.model.settings.options.NotationOption
-import cafe.adriel.chroma.model.settings.options.PitchDetectionAlgorithmOption
 import cafe.adriel.satchel.SatchelStorage
 import cafe.adriel.satchel.ktx.value
 import kotlinx.coroutines.CoroutineScope

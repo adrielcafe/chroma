@@ -15,12 +15,12 @@ import be.tarsos.dsp.io.android.AndroidAudioInputStream
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
+import cafe.adriel.chroma.ktx.logError
 import cafe.adriel.chroma.model.settings.Settings
 import cafe.adriel.chroma.model.tuner.ChromaticScale
 import cafe.adriel.chroma.model.tuner.Tuning
 import cafe.adriel.chroma.model.tuner.TuningDeviationPrecision
 import cafe.adriel.chroma.model.tuner.TuningDeviationResult
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlin.math.absoluteValue
 import kotlin.math.log2
 import kotlin.math.roundToInt
@@ -78,57 +78,56 @@ class TunerManager(
         }
     }
 
-    private suspend fun startListener(settings: Settings) = withContext(Dispatchers.IO) {
-        try {
-            if (permissionManager.hasRequiredPermissions.not()) {
-                return@withContext
-            }
+    private suspend fun startListener(settings: Settings) {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                if (permissionManager.hasRequiredPermissions.not()) {
+                    return@withContext
+                }
 
-            val bufferSize = getBufferSize()
-            val audioRecord = getAudioRecord(bufferSize).apply {
-                startRecording()
-            }
+                val bufferSize = getBufferSize()
+                val audioRecord = getAudioRecord(bufferSize).apply {
+                    startRecording()
+                }
 
-            if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
-                startNoiseSuppressor(audioRecord.audioSessionId)
-            }
+                if (NoiseSuppressor.isAvailable() && settings.noiseSuppressor) {
+                    startNoiseSuppressor(audioRecord.audioSessionId)
+                }
 
-            pitchProcessor = PitchProcessor(
-                settings.pitchDetectionAlgorithm.algorithm,
-                SAMPLE_RATE.toFloat(),
-                bufferSize,
-                this@TunerManager
-            )
-            audioDispatcher = getAudioDispatcher(audioRecord, bufferSize).apply {
-                addAudioProcessor(pitchProcessor)
-                run()
-            }
-        } catch (e: Throwable) {
-            FirebaseCrashlytics.getInstance().recordException(e)
+                pitchProcessor = PitchProcessor(
+                    settings.pitchDetectionAlgorithm.algorithm,
+                    SAMPLE_RATE.toFloat(),
+                    bufferSize,
+                    this@TunerManager
+                )
+                audioDispatcher = getAudioDispatcher(audioRecord, bufferSize).apply {
+                    addAudioProcessor(pitchProcessor)
+                    run()
+                }
+            }.onFailure(::logError)
         }
     }
 
-    private suspend fun stopListener() = withContext(Dispatchers.IO) {
-        try {
-            stopNoiseSuppressor()
+    private suspend fun stopListener() {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                stopNoiseSuppressor()
 
-            audioDispatcher?.apply {
-                removeAudioProcessor(pitchProcessor)
-                stop()
-            }
+                audioDispatcher?.apply {
+                    removeAudioProcessor(pitchProcessor)
+                    stop()
+                }
 
-            noiseSuppressor = null
-            pitchProcessor = null
-            audioDispatcher = null
-        } catch (e: Throwable) {
-            FirebaseCrashlytics.getInstance().recordException(e)
+                noiseSuppressor = null
+                pitchProcessor = null
+                audioDispatcher = null
+            }.onFailure(::logError)
         }
     }
 
     private fun startNoiseSuppressor(audioSessionId: Int) {
-        noiseSuppressor = NoiseSuppressor.create(audioSessionId).apply {
-            enabled = true
-        }
+        noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+            .apply { enabled = true }
     }
 
     private fun stopNoiseSuppressor() {

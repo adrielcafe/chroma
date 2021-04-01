@@ -3,9 +3,7 @@ package cafe.adriel.chroma.ktx
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Patterns
-
-private val EMAIL_REGEX = Patterns.EMAIL_ADDRESS.toRegex()
+import androidx.core.net.MailTo
 
 fun Uri.open(context: Context) {
     runCatching {
@@ -14,4 +12,4 @@ fun Uri.open(context: Context) {
 }
 
 fun Uri.isEmail(): Boolean =
-    EMAIL_REGEX.matches(toString())
+    scheme == MailTo.MAILTO_SCHEME

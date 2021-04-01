@@ -55,26 +55,22 @@ import cafe.adriel.chroma.ktx.appVersion
 import cafe.adriel.chroma.ktx.isEmail
 import cafe.adriel.chroma.ktx.open
 import cafe.adriel.chroma.ktx.sendContactEmail
-import cafe.adriel.chroma.model.settings.ContactLink
-import cafe.adriel.chroma.model.settings.DonationProduct
+import cafe.adriel.chroma.model.ContactLink
+import cafe.adriel.chroma.model.DonationProduct
 import cafe.adriel.chroma.view.theme.ChromaColors
 
 private val DONATE_PICKER_WIDTH = 250.dp
 
 @Composable
 fun AboutDialog(onClose: () -> Unit) =
-    Dialog(
-        onDismissRequest = onClose
-    ) {
+    Dialog(onDismissRequest = onClose) {
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colors.background)
         ) {
             AboutHeader(onClose = onClose)
-            Surface(
-                contentColor = MaterialTheme.colors.onBackground
-            ) {
+            Surface(contentColor = MaterialTheme.colors.onBackground) {
                 LazyColumn(
                     modifier = Modifier
                         .background(MaterialTheme.colors.background)
@@ -86,7 +82,7 @@ fun AboutDialog(onClose: () -> Unit) =
                             val appVersion = remember { context.appVersion }
 
                             Text(
-                                text = stringResource(R.string.adriel_cafe),
+                                text = stringResource(R.string.author_name),
                                 color = MaterialTheme.colors.secondary,
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Bold,
@@ -94,7 +90,7 @@ fun AboutDialog(onClose: () -> Unit) =
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Text(
-                                text = stringResource(R.string.android_developer),
+                                text = stringResource(R.string.author_job),
                                 style = MaterialTheme.typography.body2,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
@@ -286,7 +282,7 @@ private fun RepositoryButton(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(end = 8.dp)
             )
             Text(
-                text = stringResource(R.string.adrielcafe_chroma),
+                text = stringResource(R.string.repository_path),
                 softWrap = false,
                 style = MaterialTheme.typography.caption
             )

@@ -1,4 +1,4 @@
-package cafe.adriel.chroma.model.settings.options
+package cafe.adriel.chroma.model.settings
 
 import androidx.annotation.StringRes
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm

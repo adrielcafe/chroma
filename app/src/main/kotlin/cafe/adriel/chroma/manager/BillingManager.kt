@@ -7,12 +7,12 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import cafe.adriel.chroma.BuildConfig
 import cafe.adriel.chroma.R
-import cafe.adriel.chroma.model.settings.DonationProduct
+import cafe.adriel.chroma.ktx.logError
+import cafe.adriel.chroma.model.DonationProduct
 import com.github.stephenvinouze.core.managers.KinAppManager
 import com.github.stephenvinouze.core.models.KinAppProductType
 import com.github.stephenvinouze.core.models.KinAppPurchase
 import com.github.stephenvinouze.core.models.KinAppPurchaseResult
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,46 +40,46 @@ class BillingManager(
     }
 
     override fun onBillingReady() {
-        scope.launch {
-            _state.value = try {
-                kin.restorePurchases(KinAppProductType.INAPP)?.forEach {
-                    kin.consumePurchase(it)
-                }
-                kin.isBillingSupported(KinAppProductType.INAPP)
-            } catch (e: Exception) {
-                FirebaseCrashlytics.getInstance().recordException(e)
-                false
-            }
+        _state.value = runCatching {
+            kin.restorePurchases(KinAppProductType.INAPP)?.consumeAll()
+            kin.isBillingSupported(KinAppProductType.INAPP)
         }
+            .onFailure(::logError)
+            .getOrDefault(false)
     }
 
     override fun onPurchaseFinished(purchaseResult: KinAppPurchaseResult, purchase: KinAppPurchase?) {
         scope.launch {
-            val success = if (purchaseResult == KinAppPurchaseResult.SUCCESS && purchase != null) {
-                kin.consumePurchase(purchase).await()
-            } else {
-                false
-            }
-
-            if (success) {
-                messagingManager.send(R.string.thanks_for_support)
-            }
+            runCatching {
+                if (purchaseResult == KinAppPurchaseResult.SUCCESS && purchase != null) {
+                    kin.consumePurchase(purchase).await()
+                } else {
+                    false
+                }
+            }.fold(
+                onSuccess = { consumed ->
+                    if (consumed) {
+                        messagingManager.send(R.string.thanks_for_support)
+                    }
+                },
+                onFailure = ::logError
+            )
         }
     }
 
     fun verifyPurchase(requestCode: Int, resultCode: Int, data: Intent?) =
-        try {
-            kin.verifyPurchase(requestCode, resultCode, data)
-        } catch (e: Exception) {
-            FirebaseCrashlytics.getInstance().recordException(e)
-            false
-        }
+        runCatching { kin.verifyPurchase(requestCode, resultCode, data) }
+            .onFailure(::logError)
+            .getOrDefault(false)
 
     fun donate(product: DonationProduct) {
-        if (BuildConfig.RELEASE) {
-            kin.purchase(activity, product.sku, KinAppProductType.INAPP)
-        } else {
-            kin.purchase(activity, KinAppManager.TEST_PURCHASE_SUCCESS, KinAppProductType.INAPP)
+        val sku = if (BuildConfig.RELEASE) product.sku else KinAppManager.TEST_PURCHASE_SUCCESS
+        kin.purchase(activity, sku, KinAppProductType.INAPP)
+    }
+
+    private fun List<KinAppPurchase>.consumeAll() {
+        scope.launch {
+            forEach { kin.consumePurchase(it) }
         }
     }
 }

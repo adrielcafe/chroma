@@ -1,13 +1,13 @@
 package cafe.adriel.chroma.model.tuner
 
+import cafe.adriel.chroma.model.settings.AccidentalOption
+import cafe.adriel.chroma.model.settings.NotationOption
 import cafe.adriel.chroma.model.settings.Settings
-import cafe.adriel.chroma.model.settings.options.AccidentalOption
-import cafe.adriel.chroma.model.settings.options.NotationOption
 
 data class Tuning(
     val note: ChromaticScale? = null,
     val frequency: Float = -1f,
-    val deviationResult: TuningDeviationResult = TuningDeviationResult.NotDetected
+    val deviation: TuningDeviationResult = TuningDeviationResult.NotDetected
 ) {
 
     val formattedFrequency by lazy { ChromaticScale.FREQUENCY_FORMAT.format(frequency) }

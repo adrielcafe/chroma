@@ -45,9 +45,7 @@ private enum class SelectionOptionPosition(val startPadding: Dp, val endPadding:
 
 @Composable
 fun SwitchPreference(title: String, subtitle: String, checked: Boolean, onChanged: () -> Unit) =
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Row(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .weight(.8f)
@@ -68,21 +66,14 @@ fun SwitchPreference(title: String, subtitle: String, checked: Boolean, onChange
 
 @Composable
 fun <T : SelectOption<T>> SelectPreference(title: String, selected: T, options: Array<T>, onSelected: (T) -> Unit) =
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        val listState = rememberLazyListState(
-            initialFirstVisibleItemIndex = options.indexOf(selected)
-        )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = options.indexOf(selected))
 
         Title(
             value = title,
             modifier = Modifier.padding(top = 24.dp, bottom = 6.dp, start = 24.dp, end = 24.dp)
         )
-        LazyRow(
-            state = listState
-        ) {
+        LazyRow(state = listState) {
             items(
                 items = options,
                 key = { it.labelRes }
@@ -132,12 +123,11 @@ private fun Title(value: String, modifier: Modifier = Modifier) =
     )
 
 @Composable
-private fun Subtitle(value: String, modifier: Modifier = Modifier) =
+private fun Subtitle(value: String) =
     Text(
         text = value,
         color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium),
-        style = MaterialTheme.typography.caption,
-        modifier = modifier
+        style = MaterialTheme.typography.caption
     )
 
 @Composable

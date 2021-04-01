@@ -31,7 +31,7 @@ fun TuningNote(
     note: ChromaticScale,
     tone: String,
     semitone: String,
-    basicMode: Boolean,
+    advancedMode: Boolean,
     modifier: Modifier = Modifier
 ) =
     ConstraintLayout(modifier = modifier) {
@@ -56,7 +56,7 @@ fun TuningNote(
                 top.linkTo(toneRef.top)
             }
         )
-        if (basicMode.not()) {
+        if (advancedMode) {
             Text(
                 text = note.octave.toString(),
                 color = MaterialTheme.colors.onBackground,
@@ -135,14 +135,13 @@ fun TuningDeviationBars(deviationResult: TuningDeviationResult, modifier: Modifi
     ) {
         TuningDeviationPrecision.values().forEach { item ->
             TuningDeviationBar(
-                color = item.color, height = item.barHeight,
+                color = item.color,
+                height = item.barHeight,
                 active = when (deviationResult) {
                     is TuningDeviationResult.NotDetected -> false
                     is TuningDeviationResult.Detected -> item == deviationResult.precision
-                    is TuningDeviationResult.Animation -> item in setOf(
-                        deviationResult.negativePrecision,
-                        deviationResult.positivePrecision
-                    )
+                    is TuningDeviationResult.Animation ->
+                        item in setOf(deviationResult.negativePrecision, deviationResult.positivePrecision)
                 }
             )
         }
