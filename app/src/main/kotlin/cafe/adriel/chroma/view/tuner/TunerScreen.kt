@@ -137,7 +137,7 @@ class TunerScreen(
                 TuningNote(
                     note = tuning.note,
                     tone = tuning.getTone(settings),
-                    semitone = tuning.getSemitoneSymbolRes(settings)?.let { stringResource(it) }.orEmpty(),
+                    accidental = tuning.getSemitoneSymbolRes(settings)?.let { painterResource(it) },
                     advancedMode = settings.advancedMode,
                     modifier = Modifier.constrainAs(noteRef) {
                         centerHorizontallyTo(parent)

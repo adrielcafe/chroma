@@ -15,10 +15,8 @@
     <string name="give_permission">Allow</string>
     <string name="permission_needed">Permission required</string>
     <string name="accidental">Accidental</string>
-    <string name="accidental_sharp_symbol" translatable="false">♯</string>
-    <string name="accidental_flat_symbol" translatable="false">♭</string>
-    <string name="accidental_sharp">Sharp (♯)</string>
-    <string name="accidental_flat">Flat (♭)</string>
+    <string name="accidental_sharp">Sharp</string>
+    <string name="accidental_flat">Flat</string>
     <string name="notation">Notation</string>
     <string name="notation_a_b_c" translatable="false">A B C</string>
     <string name="notation_do_re_mi" translatable="false">Do Re Mi</string>

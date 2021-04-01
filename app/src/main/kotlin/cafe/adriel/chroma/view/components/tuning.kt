@@ -6,14 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
@@ -30,7 +33,7 @@ import cafe.adriel.chroma.model.tuner.TuningUnit
 fun TuningNote(
     note: ChromaticScale,
     tone: String,
-    semitone: String,
+    accidental: Painter?,
     advancedMode: Boolean,
     modifier: Modifier = Modifier
 ) =
@@ -46,16 +49,19 @@ fun TuningNote(
                 centerVerticallyTo(parent)
             }
         )
-        Text(
-            text = semitone,
-            color = MaterialTheme.colors.onBackground,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.h2,
-            modifier = Modifier.constrainAs(semitoneRef) {
-                start.linkTo(toneRef.end, margin = 12.dp)
-                top.linkTo(toneRef.top)
-            }
-        )
+        if (accidental != null) {
+            Icon(
+                painter = accidental,
+                tint = MaterialTheme.colors.onBackground,
+                contentDescription = "Accidental",
+                modifier = Modifier
+                    .height(64.dp)
+                    .constrainAs(semitoneRef) {
+                        start.linkTo(toneRef.end, margin = 4.dp)
+                        top.linkTo(toneRef.top, margin = 8.dp)
+                    }
+            )
+        }
         if (advancedMode) {
             Text(
                 text = note.octave.toString(),
