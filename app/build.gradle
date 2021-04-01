@@ -8,8 +8,8 @@ android {
         applicationId "cafe.adriel.chroma"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 9
-        versionName "1.0.8"
+        versionCode 10
+        versionName "1.1.0"
         resConfigs 'en', 'pt'
     }
     buildTypes {
