@@ -4,7 +4,7 @@
     <string name="settings">Configurações</string>
     <string name="notation">Notação</string>
     <string name="precision">Precisão</string>
-    <string name="advanced_mode">Modo Básico</string>
+    <string name="advanced_mode">Modo Avançado</string>
     <string name="show_secondary_data">Exibe dados secundários, como oitava e frequência</string>
     <string name="noise_suppressor">Supressor de Ruído</string>
     <string name="removes_background_noise">Remove o ruído de fundo</string>

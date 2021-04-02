@@ -95,6 +95,7 @@ class TunerViewModel(
     private suspend fun requestPermissions() {
         if (permissionManager.hasRequiredPermissions.not()) {
             permissionManager.requestPermissions()
+            _state.value = _state.value.copy(hasRequiredPermissions = permissionManager.hasRequiredPermissions)
         }
     }
 

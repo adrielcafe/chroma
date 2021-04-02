@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.chroma.view.theme.ChromaColors
@@ -146,7 +147,10 @@ private fun SelectOption(title: String, selected: Boolean, position: SelectionOp
         Text(
             text = title,
             color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.caption
+            style = MaterialTheme.typography.caption,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+            maxLines = 1
         )
     }
 }
