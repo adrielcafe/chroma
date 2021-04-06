@@ -1,5 +1,6 @@
 package cafe.adriel.chroma.ktx
 
+import android.app.Activity
 import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.view.WindowManager
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import cafe.adriel.chroma.BuildConfig
@@ -55,4 +57,8 @@ fun Context.openExternalAppSettings() {
             .setData(Uri.fromParts("package", packageName, null))
             .let(::startActivity)
     }.onFailure(::logError)
+}
+
+fun Activity.keepScreenOn() {
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }
