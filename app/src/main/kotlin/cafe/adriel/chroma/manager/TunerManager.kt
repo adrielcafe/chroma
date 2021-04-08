@@ -126,15 +126,19 @@ class TunerManager(
     }
 
     private fun startNoiseSuppressor(audioSessionId: Int) {
-        noiseSuppressor = NoiseSuppressor.create(audioSessionId)
-            .apply { enabled = true }
+        runCatching {
+            noiseSuppressor = NoiseSuppressor.create(audioSessionId)
+                .apply { enabled = true }
+        }.onFailure(::logError)
     }
 
     private fun stopNoiseSuppressor() {
-        noiseSuppressor?.apply {
-            enabled = false
-            release()
-        }
+        runCatching {
+            noiseSuppressor?.apply {
+                enabled = false
+                release()
+            }
+        }.onFailure(::logError)
     }
 
     private fun getTuning(detectedFrequency: Float): Tuning {
