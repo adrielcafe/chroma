@@ -73,8 +73,10 @@ class BillingManager(
             .getOrDefault(false)
 
     fun donate(product: DonationProduct) {
-        val sku = if (BuildConfig.RELEASE) product.sku else KinAppManager.TEST_PURCHASE_SUCCESS
-        kin.purchase(activity, sku, KinAppProductType.INAPP)
+        runCatching {
+            val sku = if (BuildConfig.RELEASE) product.sku else KinAppManager.TEST_PURCHASE_SUCCESS
+            kin.purchase(activity, sku, KinAppProductType.INAPP)
+        }.onFailure(::logError)
     }
 
     private fun List<KinAppPurchase>.consumeAll() {
