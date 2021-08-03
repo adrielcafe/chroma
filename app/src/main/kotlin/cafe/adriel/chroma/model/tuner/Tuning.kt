@@ -17,11 +17,11 @@ data class Tuning(
 
         return when {
             settings.accidental == AccidentalOption.FLAT &&
-                settings.notation == NotationOption.DO_RE_MI
-                && note.semitone -> ChromaticScale.getSolfegeTone(ChromaticScale.getFlatTone(note.tone))
+                settings.notation == NotationOption.DO_RE_MI &&
+                note.semitone -> ChromaticScale.getSolfegeTone(ChromaticScale.getFlatTone(note.tone))
 
-            settings.accidental == AccidentalOption.FLAT
-                && note.semitone -> ChromaticScale.getFlatTone(note.tone)
+            settings.accidental == AccidentalOption.FLAT &&
+                note.semitone -> ChromaticScale.getFlatTone(note.tone)
 
             settings.notation == NotationOption.DO_RE_MI -> ChromaticScale.getSolfegeTone(note.tone)
 
