@@ -1,6 +1,5 @@
 package cafe.adriel.chroma.view.components
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -170,7 +169,7 @@ fun DonateDialog(onDonate: (DonationProduct) -> Unit, onClose: () -> Unit) {
                         modifier = Modifier.padding(end = 4.dp)
                     )
                     Text(
-                        text = stringResource(R.string.donate).toUpperCase(),
+                        text = stringResource(R.string.donate).uppercase(),
                         style = MaterialTheme.typography.caption
                     )
                 }
@@ -183,7 +182,7 @@ fun DonateDialog(onDonate: (DonationProduct) -> Unit, onClose: () -> Unit) {
                 modifier = Modifier.height(ButtonDefaults.MinHeight),
             ) {
                 Text(
-                    text = stringResource(R.string.later).toUpperCase(),
+                    text = stringResource(R.string.later).uppercase(),
                     style = MaterialTheme.typography.caption
                 )
             }
@@ -290,7 +289,6 @@ private fun RepositoryButton(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun DonatePicker(selectedProduct: DonationProduct, onSelect: (DonationProduct) -> Unit) =
     Column(
