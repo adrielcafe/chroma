@@ -39,6 +39,7 @@ fun TuningNote(
 ) =
     ConstraintLayout(modifier = modifier) {
         val (toneRef, semitoneRef, octaveRef, frequencyRef) = createRefs()
+        val horizontalGuideline = createGuidelineFromStart(.40f)
 
         Text(
             text = tone,
@@ -47,6 +48,7 @@ fun TuningNote(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.constrainAs(toneRef) {
                 centerVerticallyTo(parent)
+                centerAround(horizontalGuideline)
             }
         )
         if (accidental != null) {

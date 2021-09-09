@@ -141,6 +141,7 @@ class TunerScreen(
                     advancedMode = settings.advancedMode,
                     modifier = Modifier.constrainAs(noteRef) {
                         centerHorizontallyTo(parent)
+                        top.linkTo(parent.top)
                         bottom.linkTo(deviationBarsRef.top)
                     }
                 )
