@@ -1,5 +1,7 @@
 package cafe.adriel.chroma.view.tuner
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +76,14 @@ class TunerScreen(
         val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Revealed)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
+
+        BackHandler {
+            if (scaffoldState.isConcealed) {
+                scaffoldState.toggle(scope)
+                return@BackHandler
+            }
+            (context as Activity).finish()
+        }
 
         ChromaTheme {
             BackdropScaffold(
